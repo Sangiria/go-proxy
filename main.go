@@ -4,7 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
+	"strconv"
+	"strings"
+
+	"github.com/google/uuid"
 )
 
 type LogLevel struct {
@@ -67,6 +72,103 @@ type Config struct {
 }
 
 var xrayPath = "bin"
+
+func NewConfig(s string) (*Config, error) {
+	s = strings.TrimSpace(s)
+
+	u, err := url.Parse(s)
+  	if err != nil {
+    	return nil, fmt.Errorf("invalid url: %w", err)
+  	}
+  	q_u := u.Query()
+
+  	if err = ValidateVlessLink(u, q_u); err != nil {
+    	return nil, fmt.Errorf("invalid url: %w", err)
+  	}
+
+  	port, _ := strconv.ParseUint(u.Port(), 10, 16)
+  
+  	return &Config{
+		LogLevel: LogLevel{
+			LogLevel: "warning",
+    	},
+    	Inbounds: []Inbound{
+			{
+        		Tag: "socks",
+        		Listen: "127.0.0.1",
+        		Port: 10808,
+        		InboundSettings: InboundSettings{
+          			Auth: "noauth",
+          			Udp: false,
+        		},
+      		},
+    	},
+    	Outbounds: []Outbound{
+			{
+        		Tag: "proxy",
+        		Protocol: "vless",
+        		Settings: VlessSettings{
+          			VNext: []VNext{
+            			{
+              				Address: u.Hostname(),
+              				Port: uint16(port),
+              				Users: []VlessUser{
+                				{
+                  					ID: u.User.Username(),
+                  					Encryption: "none",
+                  					Flow: q_u.Get("flow"),
+                				},
+              				},
+            			},
+          			},
+        		},
+        		StreamSettings: StreamSettings{
+          			Network: q_u.Get("type"),
+          			Security: q_u.Get("security"),
+          			RealitySettings: RealitySettings{
+            			ServerName: q_u.Get("sni"),
+            			Fingerprint: q_u.Get("fp"),
+            			PublicKey: q_u.Get("pbk"),
+            			ShortID: strings.TrimRight(q_u.Get("sid"), "#"),
+          			},
+        		},
+      		},
+    	},
+  	}, nil
+}
+
+func ValidateVlessLink(u *url.URL, q_u url.Values) error {
+	if u.Scheme != "vless" || u.User == nil || u.User.Username() == "" {
+    	return fmt.Errorf("not a vless url")
+  	}
+
+  	if err := uuid.Validate(u.User.Username()); err != nil {
+    	return fmt.Errorf("invalid uuid")
+  	}
+
+  	if u.Hostname() == "" || u.Port() == "" {
+    	return fmt.Errorf("missing host or port")
+  	}
+
+  	port, err := strconv.Atoi(u.Port())
+  	if err != nil || port < 1 || port > 65535 {
+    	return fmt.Errorf("invalid port")
+  	}
+
+	if q_u.Get("security") != "reality" || q_u.Get("type") != "tcp" {
+    	return fmt.Errorf("unsupported")
+  	}
+  
+  	required := []string{"sni", "fp", "pbk", "sid"}
+  	for _, k := range required {
+    	if strings.TrimSpace(q_u.Get(k)) == "" {
+      		return fmt.Errorf("missing %s", k)
+    	}
+  	}
+
+  	return nil
+}
+
 
 func main() {
 	fmt.Print("Enter url: ")
