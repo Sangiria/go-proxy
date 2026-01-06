@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/url"
@@ -179,4 +180,16 @@ func main() {
     }
 
     fmt.Printf("read line: %s\n", line)
+
+	conf, err := NewConfig(line)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	data, err := json.MarshalIndent(conf, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+
+	err = os.WriteFile("config.json", data, 0644)
 }
