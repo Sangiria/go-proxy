@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"core/models"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -21,67 +22,10 @@ import (
 	"golang.org/x/net/proxy"
 )
 
-type LogLevel struct {
-  	LogLevel string `json:"loglevel"`
-}
-
-type Inbound struct {
-	Tag       		string      	`json:"tag"`
-  	Listen     	 	string      	`json:"listen"`
-  	Port      		uint16      	`json:"port"`
-  	Protocol    	string      	`json:"protocol"`
-  	InboundSettings InboundSettings `json:"settings"`
-}
-
-type InboundSettings struct {
-  	Auth  string  	`json:"auth"`
-  	Udp   bool  	`json:"udp"`
-}
-
-type Outbound struct {
-  	Tag            string         `json:"tag"`
-  	Protocol       string         `json:"protocol"`
-  	Settings       VlessSettings  `json:"settings"`
-  	StreamSettings StreamSettings `json:"streamSettings"`
-}
-
-type VlessSettings struct {
-  	VNext []VNext `json:"vnext"`
-}
-
-type VNext struct {
-  	Address string		`json:"address"`
-  	Port    uint16		`json:"port"`
-  	Users   []VlessUser	`json:"users"`
-}
-
-type VlessUser struct {
-  	ID         string `json:"id"`
-  	Encryption string `json:"encryption"`
-  	Flow       string `json:"flow,omitempty"`
-}
-
-type StreamSettings struct {
-  	Network         string          `json:"network"`
-  	Security        string          `json:"security"`
-  	RealitySettings RealitySettings `json:"realitySettings"`
-}
-
-type RealitySettings struct {
-  	ServerName  string `json:"serverName"`
-  	Fingerprint string `json:"fingerprint"`
-  	PublicKey   string `json:"publicKey"`
-  	ShortID     string `json:"shortId"`
-}
-
-type Config struct {
-  	LogLevel    LogLevel	`json:"log"`
-  	Inbounds   []Inbound	`json:"inbounds"`
-  	Outbounds  []Outbound	`json:"outbounds"`
-}
 
 
-func NewConfig(s string) (*Config, error) {
+
+func NewConfig(s string) (*models.Config, error) {
 	s = strings.TrimSpace(s)
 
 	u, err := url.Parse(s)
@@ -96,32 +40,32 @@ func NewConfig(s string) (*Config, error) {
 
   	port, _ := strconv.ParseUint(u.Port(), 10, 16)
   
-  	return &Config{
-		LogLevel: LogLevel{
+  	return &models.Config{
+		LogLevel: models.LogLevel{
 			LogLevel: "warning",
     	},
-    	Inbounds: []Inbound{
+    	Inbounds: []models.Inbound{
 			{
         		Tag: "socks",
         		Listen: "127.0.0.1",
         		Port: 10808,
 				Protocol: "socks",
-        		InboundSettings: InboundSettings{
+        		InboundSettings: models.InboundSettings{
           			Auth: "noauth",
           			Udp: false,
         		},
       		},
     	},
-    	Outbounds: []Outbound{
+    	Outbounds: []models.Outbound{
 			{
         		Tag: "proxy",
         		Protocol: "vless",
-        		Settings: VlessSettings{
-          			VNext: []VNext{
+        		Settings: models.VlessSettings{
+          			VNext: []models.VNext{
             			{
               				Address: u.Hostname(),
               				Port: uint16(port),
-              				Users: []VlessUser{
+              				Users: []models.VlessUser{
                 				{
                   					ID: u.User.Username(),
                   					Encryption: "none",
@@ -131,10 +75,10 @@ func NewConfig(s string) (*Config, error) {
             			},
           			},
         		},
-        		StreamSettings: StreamSettings{
+        		StreamSettings: models.StreamSettings{
           			Network: q_u.Get("type"),
           			Security: q_u.Get("security"),
-          			RealitySettings: RealitySettings{
+          			RealitySettings: models.RealitySettings{
             			ServerName: q_u.Get("sni"),
             			Fingerprint: q_u.Get("fp"),
             			PublicKey: q_u.Get("pbk"),
