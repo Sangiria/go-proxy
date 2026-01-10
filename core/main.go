@@ -60,7 +60,7 @@ func NewConfig(s string) (*models.Config, error) {
 			{
         		Tag: "proxy",
         		Protocol: "vless",
-        		Settings: models.VlessSettings{
+        		Settings: models.OutboundSettings{
           			VNext: []models.VNext{
             			{
               				Address: u.Hostname(),
