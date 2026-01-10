@@ -1,4 +1,4 @@
-module go-proxy
+module core
 
 go 1.25.1
 

@@ -6,9 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>716</width>
     <height>600</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>716</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>716</width>
+    <height>600</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
@@ -18,14 +30,23 @@
     <item>
      <widget class="QWidget" name="widget" native="true">
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(73, 73, 84);
-</string>
+       <string notr="true"/>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
+        <widget class="QPushButton" name="btnStart">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>Start</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="btnAddSubscription">
          <property name="styleSheet">
-          <string notr="true">background-color: rgb(111, 111, 121);</string>
+          <string notr="true"/>
          </property>
          <property name="text">
           <string>Add</string>
@@ -33,12 +54,12 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="btnStart">
+        <widget class="QPushButton" name="btnUpdateSubscriptions">
          <property name="styleSheet">
-          <string notr="true">background-color: rgb(111, 111, 121);</string>
+          <string notr="true"/>
          </property>
          <property name="text">
-          <string>Start</string>
+          <string>Update</string>
          </property>
         </widget>
        </item>
@@ -59,7 +80,54 @@
      </widget>
     </item>
     <item>
+     <widget class="QWidget" name="widget_2" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QComboBox" name="cbSubscriptionType">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <item>
+          <property name="text">
+           <string>All</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Groups</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Manual</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
      <widget class="QTableWidget" name="tableSubs">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="autoFillBackground">
        <bool>false</bool>
       </property>
@@ -91,6 +159,11 @@
       <column>
        <property name="text">
         <string>TLS</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Source</string>
        </property>
       </column>
      </widget>
