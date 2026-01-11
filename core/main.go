@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"core/manager"
 	"fmt"
 	"log"
 	"net/url"
@@ -56,6 +57,13 @@ func main() {
     }
 
     fmt.Printf("read line: %s\n", line)
+
+	answer, err := manager.HandleAdd(line)
+	if err != nil {
+		fmt.Printf("%s:%s",answer, err)
+	}
+
+	fmt.Printf(answer)
 
 	// conf, err := NewConfig(line)
 	// if err != nil {
