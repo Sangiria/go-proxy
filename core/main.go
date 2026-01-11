@@ -2,93 +2,15 @@ package main
 
 import (
 	"bufio"
-	"context"
-	"core/models"
-	"crypto/tls"
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net"
-	"net/http"
 	"net/url"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
-	"golang.org/x/net/proxy"
 )
-
-
-
-
-func NewConfig(s string) (*models.Config, error) {
-	s = strings.TrimSpace(s)
-
-	u, err := url.Parse(s)
-  	if err != nil {
-    	return nil, fmt.Errorf("invalid url: %w", err)
-  	}
-  	q_u := u.Query()
-
-  	if err = ValidateVlessLink(u, q_u); err != nil {
-    	return nil, fmt.Errorf("invalid url: %w", err)
-  	}
-
-  	port, _ := strconv.ParseUint(u.Port(), 10, 16)
-  
-  	return &models.Config{
-		LogLevel: models.LogLevel{
-			LogLevel: "warning",
-    	},
-    	Inbounds: []models.Inbound{
-			{
-        		Tag: "socks",
-        		Listen: "127.0.0.1",
-        		Port: 10808,
-				Protocol: "socks",
-        		InboundSettings: models.InboundSettings{
-          			Auth: "noauth",
-          			Udp: false,
-        		},
-      		},
-    	},
-    	Outbounds: []models.Outbound{
-			{
-        		Tag: "proxy",
-        		Protocol: "vless",
-        		Settings: models.OutboundSettings{
-          			VNext: []models.VNext{
-            			{
-              				Address: u.Hostname(),
-              				Port: uint16(port),
-              				Users: []models.VlessUser{
-                				{
-                  					ID: u.User.Username(),
-                  					Encryption: "none",
-                  					Flow: q_u.Get("flow"),
-                				},
-              				},
-            			},
-          			},
-        		},
-        		StreamSettings: models.StreamSettings{
-          			Network: q_u.Get("type"),
-          			Security: q_u.Get("security"),
-          			RealitySettings: models.RealitySettings{
-            			ServerName: q_u.Get("sni"),
-            			Fingerprint: q_u.Get("fp"),
-            			PublicKey: q_u.Get("pbk"),
-            			ShortID: strings.TrimRight(q_u.Get("sid"), "#"),
-          			},
-        		},
-      		},
-    	},
-  	}, nil
-}
 
 func ValidateVlessLink(u *url.URL, q_u url.Values) error {
 	if u.Scheme != "vless" || u.User == nil || u.User.Username() == "" {
@@ -125,33 +47,6 @@ func ValidateVlessLink(u *url.URL, q_u url.Values) error {
 var xrayPath = "./bin/xray"
 var configPath = "config.json"
 
-func generateTrafficViaSocks(socksAddr string) error {
-    dialer, err := proxy.SOCKS5("tcp", socksAddr, nil, proxy.Direct)
-    if err != nil {
-        return fmt.Errorf("socks dialer: %w", err)
-    }
-
-    tr := &http.Transport{
-        DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-            return dialer.Dial(network, addr)
-        },
-        TLSClientConfig: &tls.Config{MinVersion: tls.VersionTLS12},
-    }
-
-    client := &http.Client{
-        Transport: tr,
-        Timeout:   8 * time.Second,
-    }
-
-    resp, err := client.Get("https://google.com")
-    if err != nil {
-        return fmt.Errorf("http via socks: %w", err)
-    }
-    defer resp.Body.Close()
-    _, _ = io.ReadAll(io.LimitReader(resp.Body, 256))
-    return nil
-}
-
 func main() {
 	fmt.Print("Enter url: ")
   	reader := bufio.NewReader(os.Stdin)
@@ -162,81 +57,15 @@ func main() {
 
     fmt.Printf("read line: %s\n", line)
 
-	conf, err := NewConfig(line)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// conf, err := NewConfig(line)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	data, err := json.MarshalIndent(conf, "", "  ")
-	if err != nil {
-		panic(err)
-	}
+	// data, err := json.MarshalIndent(conf, "", "  ")
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	err = os.WriteFile("config.json", data, 0644)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	cmd := exec.CommandContext(ctx, xrayPath, "run", "-config", configPath)
-
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		panic(err)
-	}
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		panic(err)
-	}
-
-	if err := cmd.Start(); err != nil {
-		panic(fmt.Errorf("xray start error: %w", err))
-	}
-
-	go stream("XRAY-OUT", stdout)
-	go stream("XRAY-ERR", stderr)
-
-	if err := waitTCP("127.0.0.1:10808", 3*time.Second); err != nil {
-		_ = cmd.Process.Kill()
-		panic(fmt.Errorf("xray not ready: %w", err))
-	}
-
-	fmt.Println("✅ xray started, inbound is ready on 127.0.0.1:10808")
-
-	go func() {
-    	time.Sleep(300 * time.Millisecond)
-
-    	err := generateTrafficViaSocks("127.0.0.1:10808")
-    	if err != nil {
-        	fmt.Println("[TRAFFIC] error:", err)
-    	} else {
-        	fmt.Println("[TRAFFIC] ok")
-    	}
-	}()
-
-	time.Sleep(20 * time.Second)
-
-	cancel()
-
-	_ = cmd.Wait()
-	fmt.Println("🛑 xray stopped")
-}
-
-func stream(prefix string, r interface{ Read([]byte) (int, error) }) {
-	sc := bufio.NewScanner(r)
-	for sc.Scan() {
-		fmt.Printf("[%s] %s\n", prefix, sc.Text())
-	}
-}
-
-func waitTCP(addr string, timeout time.Duration) error {
-	deadline := time.Now().Add(timeout)
-	for time.Now().Before(deadline) {
-		conn, err := net.DialTimeout("tcp", addr, 250*time.Millisecond)
-		if err == nil {
-			_ = conn.Close()
-			return nil
-		}
-		time.Sleep(100 * time.Millisecond)
-	}
-	return fmt.Errorf("port %s not open within %s", addr, timeout)
+	// err = os.WriteFile("config.json", data, 0644)
 }
