@@ -29,8 +29,8 @@ type Node struct {
 }
 
 type Source struct {
-	Type			string	`json:"type"`
-	SubscriptionID	string	`json:"subscription_id,omitempty"`
+	Type			SourceType	`json:"type"`
+	SubscriptionID	string		`json:"subscription_id,omitempty"`
 }
 
 type Parsed struct {
