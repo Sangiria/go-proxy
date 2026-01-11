@@ -39,8 +39,8 @@ func LoadState() (*models.State, error) {
 		//create new file
 		new_state := models.State{
 			ActiveNodeId: "",
-			Subscriptions: []*models.Subscription{},
-			Nodes: []*models.Node{},
+			Subscriptions: make(map[string]*models.Subscription),
+			Nodes: make(map[string]*models.Node),
 		}
 
 		data, _ := json.MarshalIndent(new_state, "", "\t")

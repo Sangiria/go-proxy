@@ -38,7 +38,13 @@ func AddNodesHandler(url string) (string, error) {
 		}
 
 		//update struct State
-		state.Nodes = append(state.Nodes, new_node)
+		node_key := utils.DeterministicID(new_node.Parsed)
+		_, found := state.Nodes[node_key]
+		if found {
+			return "error", fmt.Errorf("node already exist")
+		}
+
+		state.Nodes[utils.DeterministicID(new_node.Parsed)] = new_node
 	} else {
 		return "error", fmt.Errorf("nothing to add")
 	}

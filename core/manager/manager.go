@@ -4,8 +4,6 @@ import (
 	"core/models"
 	"core/utils"
 	"net/url"
-
-	"github.com/google/uuid"
 )
 
 func CreateNode(u *url.URL, source models.Source) (*models.Node, error) {
@@ -21,7 +19,6 @@ func CreateNode(u *url.URL, source models.Source) (*models.Node, error) {
 	}
 
 	return &models.Node{
-		ID: uuid.NewString(),
 		Name: name,
 		Source: source,
 		URL: u.String(),
