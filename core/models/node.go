@@ -23,7 +23,7 @@ const (
 )
 
 type Node struct {
-	ID			string		`json:"id"`
+	// ID			string		`json:"id"`
 	Name		string		`json:"name"`
 	Source		Source		`json:"source"`
 	URL			string		`json:"url"`

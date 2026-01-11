@@ -16,7 +16,6 @@ import (
 type parseResult struct {
 	URLs			[]*url.URL
 	SourseType		models.SourceType
-	Subscription	models.Subscription
 }
 
 //parsing the links the result is a ParseResult struct
