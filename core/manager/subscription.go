@@ -7,21 +7,88 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
 )
 
-func HandleAdd(url_string string) {
+type parseResult struct {
+	URLs			[]string
+	SourseType		models.SourceType
+	Subscription	models.Subscription
+}
+
+//HandleAdd saves nodes and subscription if exists to file, sends [ok] if successfull
+func LoadState() (*models.State, error) {
+	//read state file if not create file
+
+	if _, err := os.Stat("./state"); os.IsNotExist(err) {
+		err = os.Mkdir("state", 0755)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if _, err := os.Stat("./state/state.json"); os.IsNotExist(err) {
+		new_state := models.State{
+			ActiveNodeId: "",
+			Subscriptions: []*models.Subscription{},
+			Nodes: []*models.Node{},
+		}
+
+		data, _ := json.MarshalIndent(new_state, "", "\t")
+		if err = os.WriteFile("./state/state.json", data, 0600); err != nil {
+			return nil, err
+		}
+
+		return &new_state, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	var state models.State
+
+	file, err := os.ReadFile("./state/state.json")
+	if err != nil {
+		return nil, err
+	}
+
+	//save to variable (struct State)
+	err = json.Unmarshal(file, state)
+	if err != nil {
+		return nil, err
+	}
+
+	return &state, nil
+}
+
+func HandleAdd(url_string string) (string, error) {
+	if url_string == "" {
+		return "error", fmt.Errorf("empty url")
+	}
+	
+	_, err := LoadState()
+	if err != nil {
+		return "error", fmt.Errorf("something went wrong while loading state: %w", err)
+	}
+	
+	//parseInput function call
+	//get parseResult
+
+	//create nodes from parseResult urls
+	//update struct State
+	//update file
+
+	return "ok", nil
+}
+
+func CreateSubscription() {
 
 }
 
 func CreateNode(url string, source models.Source) {
-
-}
-
-func CreateSubscription() {
 
 }
 
