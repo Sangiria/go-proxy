@@ -21,8 +21,17 @@ type parseResult struct {
 }
 
 func SaveState(state *models.State) error {
-	data, _ := json.MarshalIndent(state, "", "\t")
-	if err := os.WriteFile("./state/state.json", data, 0600); err != nil {
+	file, err := os.OpenFile("./state/state.json", os.O_WRONLY|os.O_TRUNC, 0)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	enc := json.NewEncoder(file)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", "\t")
+
+	if err := enc.Encode(state); err != nil {
 		return err
 	}
 
@@ -75,7 +84,8 @@ func LoadState() (*models.State, error) {
 	return &state, nil
 }
 
-func HandleAdd(url_string string) (string, error) {
+func HandleAdd(url string) (string, error) {
+	url_string := strings.TrimSpace(url)
 	if url_string == "" {
 		return "error", fmt.Errorf("empty url")
 	}
