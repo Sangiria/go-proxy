@@ -46,14 +46,14 @@ type VlessUser struct {
   	ID         	string 	`json:"id"`
   	Encryption 	string 	`json:"encryption"`
   	Flow       	string 	`json:"flow,omitempty"` 	//optional
-	Level		uint	`json:"level,omitempty"`	//optional
+	Level		uint32	`json:"level,omitempty"`	//optional
 }
 
 type StreamSettings struct {
-  	Network         string          `json:"network"`					//for now tcp or xhttp only
-  	Security        string          `json:"security,omitempty"`			//for now reality only
-  	RealitySettings RealitySettings `json:"realitySettings,omitzero"`
-	XttpSettings	XttpSettings	`json:"xhttpSettings,omitzero"` 	//if transport is xhttp (tcp is the default)
+  	Network         Transport          	`json:"network"`					//for now tcp or xhttp only
+  	Security        Security          	`json:"security,omitempty"`			//for now reality only
+  	RealitySettings *RealitySettings 	`json:"realitySettings,omitempty"`
+	XttpSettings	*XttpSettings		`json:"xhttpSettings,omitempty"` 	//if transport is xhttp (tcp is the default)
 }
 
 type XttpSettings struct {
@@ -64,15 +64,75 @@ type XttpSettings struct {
 }
 
 type RealitySettings struct {
-  	ServerName  string 	`json:"serverName"` 		//sni
-  	Fingerprint string 	`json:"fingerprint"`		//fp
-  	PublicKey   string 	`json:"publicKey"`			//pbk
-  	ShortID     string 	`json:"shortId,omitempty"`	//sid optional
-	SpiderX		string	`json:"spiderX,omitempty"`	//optional
+  	ServerName  	string 	`json:"serverName"` 			//sni
+  	Fingerprint 	string 	`json:"fingerprint"`			//fp
+  	PublicKey   	string 	`json:"publicKey"`				//pbk
+  	ShortID     	string 	`json:"shortId,omitempty"`		//sid optional
 }
 
 type Config struct {
   	LogLevel    LogLevel	`json:"log"`
   	Inbounds   []Inbound	`json:"inbounds"`
   	Outbounds  []Outbound	`json:"outbounds"`
+}
+
+func NewConfig(n *Parsed) *Config {
+	return &Config{
+		LogLevel: LogLevel{
+			LogLevel: "info",
+    	},
+    	Inbounds: []Inbound{
+			{
+        		Tag: "socks",
+        		Listen: "127.0.0.1",
+        		Port: 10808,
+				Protocol: "socks",
+        		InboundSettings: InboundSettings{
+          			Auth: "noauth",
+          			Udp: true,
+        		},
+				Sniffing: Sniffing{
+					Enabled: true,
+					DestOverride: []string{"http", "tls"},
+				},
+      		},
+    	},
+    	Outbounds: []Outbound{
+			{
+        		Tag: "proxy",
+        		Protocol: "vless",
+        		Settings: OutboundSettings{
+          			VNext: []VNext{
+            			{
+              				Address: n.Address,
+              				Port: n.Port,
+              				Users: []VlessUser{
+                				{
+                  					ID: n.UUID,
+                  					Encryption: "none",
+                  					Flow: n.Flow,
+                				},
+              				},
+            			},
+          			},
+        		},
+        		StreamSettings: StreamSettings{
+          			Network: n.Transport,
+          			Security: n.Security,
+          			RealitySettings: &RealitySettings{
+            			ServerName: n.Sni,
+            			Fingerprint: n.Fp,
+            			PublicKey: n.Pbk,
+            			ShortID: n.Sid,
+          			},
+					XttpSettings: &XttpSettings{
+						Host: n.Host,
+						Path: n.Path,
+						Mode: n.XHTTPMode,
+						XttpExtra: n.XHTTPExtra,
+					},
+        		},
+      		},
+    	},
+  	}
 }
