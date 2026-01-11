@@ -1,4 +1,4 @@
-package manager
+package utils
 
 import (
 	"core/models"
@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 
@@ -18,133 +17,6 @@ type parseResult struct {
 	URLs			[]*url.URL
 	SourseType		models.SourceType
 	Subscription	models.Subscription
-}
-
-func SaveState(state *models.State) error {
-	file, err := os.OpenFile("./state/state.json", os.O_WRONLY|os.O_TRUNC, 0)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	enc := json.NewEncoder(file)
-	enc.SetEscapeHTML(false)
-	enc.SetIndent("", "\t")
-
-	if err := enc.Encode(state); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-//HandleAdd saves nodes and subscription if exists to file, sends [ok] if successfull (for now)
-func LoadState() (*models.State, error) {
-	//read state file if not create file
-
-	if _, err := os.Stat("./state"); os.IsNotExist(err) {
-		err = os.Mkdir("state", 0755)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if _, err := os.Stat("./state/state.json"); os.IsNotExist(err) {
-		//create new file
-		new_state := models.State{
-			ActiveNodeId: "",
-			Subscriptions: []*models.Subscription{},
-			Nodes: []*models.Node{},
-		}
-
-		data, _ := json.MarshalIndent(new_state, "", "\t")
-		if err = os.WriteFile("./state/state.json", data, 0600); err != nil {
-			return nil, err
-		}
-
-		return &new_state, nil
-	} else if err != nil {
-		return nil, err
-	}
-
-	var state models.State
-
-	//read existing file
-	file, err := os.ReadFile("./state/state.json")
-	if err != nil {
-		return nil, err
-	}
-
-	//save to variable (struct State)
-	err = json.Unmarshal(file, &state)
-	if err != nil {
-		return nil, err
-	}
-
-	return &state, nil
-}
-
-func HandleAdd(url string) (string, error) {
-	url_string := strings.TrimSpace(url)
-	if url_string == "" {
-		return "error", fmt.Errorf("empty url")
-	}
-	
-	//get state variable
-	state, err := LoadState()
-	if err != nil {
-		return "error", fmt.Errorf("something went wrong while loading state: %w", err)
-	}
-	
-	//parseInput function call
-	result, err := ParseInput(url_string)
-	
-	n := len(result.URLs)
-	//create nodes from parseResult urls
-	if n > 1 {
-
-	} else if n == 1 {
-		new_node, err := CreateNode(result.URLs[0], models.Source{
-			Type: result.SourseType,
-		})
-
-		if err != nil {
-			return "error", err
-		}
-
-		//update struct State
-		state.Nodes = append(state.Nodes, new_node)
-	} else {
-		return "error", fmt.Errorf("nothing to add")
-	}
-
-	//update file
-	if err = SaveState(state); err != nil {
-		return "error", err
-	}
-
-	return "ok", nil
-}
-
-func CreateNode(u *url.URL, source models.Source) (*models.Node, error) {
-	q_u := u.Query()
-	parsed, err := parseVLESS(u, q_u)
-	if err != nil {
-		return nil, err
-	}
-
-	name := u.Fragment 
-	if name == "" {
-		name = u.Host
-	}
-
-	return &models.Node{
-		ID: uuid.NewString(),
-		Name: name,
-		Source: source,
-		URL: u.String(),
-		Parsed: *parsed,
-	}, nil
 }
 
 //parsing the links the result is a ParseResult struct
@@ -174,13 +46,7 @@ func FetchVLESSLinks(u *url.URL) {
 
 }
 
-func CreateSubscription() {
-
-}
-
-
-
-func parseVLESS(url *url.URL, url_q url.Values) (*models.Parsed, error) {
+func ParseVLESS(url *url.URL, url_q url.Values) (*models.Parsed, error) {
 	var (
 		transport models.Transport
 		security models.Security
