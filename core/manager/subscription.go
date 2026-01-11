@@ -15,12 +15,21 @@ import (
 )
 
 type parseResult struct {
-	URLs			[]string
+	URLs			[]*url.URL
 	SourseType		models.SourceType
 	Subscription	models.Subscription
 }
 
-//HandleAdd saves nodes and subscription if exists to file, sends [ok] if successfull
+func SaveState(state *models.State) error {
+	data, _ := json.MarshalIndent(state, "", "\t")
+	if err := os.WriteFile("./state/state.json", data, 0600); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//HandleAdd saves nodes and subscription if exists to file, sends [ok] if successfull (for now)
 func LoadState() (*models.State, error) {
 	//read state file if not create file
 
@@ -32,6 +41,7 @@ func LoadState() (*models.State, error) {
 	}
 
 	if _, err := os.Stat("./state/state.json"); os.IsNotExist(err) {
+		//create new file
 		new_state := models.State{
 			ActiveNodeId: "",
 			Subscriptions: []*models.Subscription{},
@@ -50,13 +60,14 @@ func LoadState() (*models.State, error) {
 
 	var state models.State
 
+	//read existing file
 	file, err := os.ReadFile("./state/state.json")
 	if err != nil {
 		return nil, err
 	}
 
 	//save to variable (struct State)
-	err = json.Unmarshal(file, state)
+	err = json.Unmarshal(file, &state)
 	if err != nil {
 		return nil, err
 	}
@@ -69,32 +80,95 @@ func HandleAdd(url_string string) (string, error) {
 		return "error", fmt.Errorf("empty url")
 	}
 	
-	_, err := LoadState()
+	//get state variable
+	state, err := LoadState()
 	if err != nil {
 		return "error", fmt.Errorf("something went wrong while loading state: %w", err)
 	}
 	
 	//parseInput function call
-	//get parseResult
-
+	result, err := ParseInput(url_string)
+	
+	n := len(result.URLs)
 	//create nodes from parseResult urls
-	//update struct State
+	if n > 1 {
+
+	} else if n == 1 {
+		new_node, err := CreateNode(result.URLs[0], models.Source{
+			Type: result.SourseType,
+		})
+
+		if err != nil {
+			return "error", err
+		}
+
+		//update struct State
+		state.Nodes = append(state.Nodes, new_node)
+	} else {
+		return "error", fmt.Errorf("nothing to add")
+	}
+
 	//update file
+	if err = SaveState(state); err != nil {
+		return "error", err
+	}
 
 	return "ok", nil
+}
+
+func CreateNode(u *url.URL, source models.Source) (*models.Node, error) {
+	q_u := u.Query()
+	parsed, err := parseVLESS(u, q_u)
+	if err != nil {
+		return nil, err
+	}
+
+	name := u.Fragment 
+	if name == "" {
+		name = u.Host
+	}
+
+	return &models.Node{
+		ID: uuid.NewString(),
+		Name: name,
+		Source: source,
+		URL: u.String(),
+		Parsed: *parsed,
+	}, nil
+}
+
+//parsing the links the result is a ParseResult struct
+func ParseInput(s_url string) (*parseResult, error) {
+	u, err := url.Parse(s_url)
+	if err != nil {
+		return nil, err
+	}
+
+	//reading url scheme
+	switch u.Scheme {
+	case "https":
+		//fetch vless urls
+		//return parseresult
+	case "vless":
+		//return parseResult
+		return &parseResult{
+			URLs: []*url.URL{u},
+			SourseType: models.SourceManual,
+		}, nil
+	}
+
+	return nil, fmt.Errorf("unsupported scheme %s", u.Scheme)
+}
+
+func FetchVLESSLinks(u *url.URL) {
+
 }
 
 func CreateSubscription() {
 
 }
 
-func CreateNode(url string, source models.Source) {
 
-}
-
-func FetchVLESSLinks() {
-
-}
 
 func parseVLESS(url *url.URL, url_q url.Values) (*models.Parsed, error) {
 	var (
