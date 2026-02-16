@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-XRAY_VERSION="${XRAY_VERSION:-25.12.8}"
-
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 BIN_DIR="${PROJECT_ROOT}/bin"
@@ -16,11 +14,8 @@ mkdir -p "$BIN_DIR"
 ARCH_RAW="$(uname -m)"
 
 case "$ARCH_RAW" in
-  x86_64)
+  x86_64|amd64)
     XRAY_ASSET="Xray-linux-64.zip"
-    ;;
-  aarch64|arm64)
-    XRAY_ASSET="Xray-linux-arm64-v8a.zip"
     ;;
   *)
     echo "Unsupported architecture: $ARCH_RAW"
@@ -37,7 +32,7 @@ trap cleanup EXIT
 
 REL_JSON="$TMP_DIR/release.json"
 curl -sSL \
-  "https://api.github.com/repos/XTLS/Xray-core/releases/tags/v${XRAY_VERSION}" \
+  "https://api.github.com/repos/XTLS/Xray-core/releases/latest" \
   -o "$REL_JSON"
 
 ASSET_URL="$(
@@ -64,7 +59,8 @@ mkdir -p "$UNPACK_DIR"
 unzip -q "$ZIP_PATH" -d "$UNPACK_DIR"
 
 cp -f "$UNPACK_DIR/xray" "$XRAY_PATH"
-chmod +x "$XRAY_PATH"
+chmod +x "$XR
 
+# for debugging. will delete later
 echo "Xray installed at: $XRAY_PATH"
 "$XRAY_PATH" version || true
