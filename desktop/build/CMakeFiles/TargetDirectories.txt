@@ -1,0 +1,9 @@
+/mnt/other/sangiri/study/projects/go-proxy/desktop/build/CMakeFiles/desktop.dir
+/mnt/other/sangiri/study/projects/go-proxy/desktop/build/CMakeFiles/edit_cache.dir
+/mnt/other/sangiri/study/projects/go-proxy/desktop/build/CMakeFiles/rebuild_cache.dir
+/mnt/other/sangiri/study/projects/go-proxy/desktop/build/CMakeFiles/list_install_components.dir
+/mnt/other/sangiri/study/projects/go-proxy/desktop/build/CMakeFiles/install.dir
+/mnt/other/sangiri/study/projects/go-proxy/desktop/build/CMakeFiles/install/local.dir
+/mnt/other/sangiri/study/projects/go-proxy/desktop/build/CMakeFiles/install/strip.dir
+/mnt/other/sangiri/study/projects/go-proxy/desktop/build/CMakeFiles/desktop_autogen_timestamp_deps.dir
+/mnt/other/sangiri/study/projects/go-proxy/desktop/build/CMakeFiles/desktop_autogen.dir

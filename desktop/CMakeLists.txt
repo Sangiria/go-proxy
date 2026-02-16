@@ -16,8 +16,8 @@ set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
         mainwindow.h
-        mainwindow.ui
-        addsubscriptiondialog.ui
+        form/mainwindow.ui
+        form/addsubscriptiondialog.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -42,6 +42,10 @@ else()
         )
     endif()
 endif()
+
+set_property(TARGET desktop PROPERTY AUTOUIC_SEARCH_PATHS
+    "${CMAKE_CURRENT_SOURCE_DIR}/form"
+)
 
 target_link_libraries(desktop PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 

@@ -1,9 +1,0 @@
-/mnt/other/sangiri/study/projects/desktop/build/Desktop_Qt_6_10_2-Debug/CMakeFiles/desktop.dir
-/mnt/other/sangiri/study/projects/desktop/build/Desktop_Qt_6_10_2-Debug/CMakeFiles/edit_cache.dir
-/mnt/other/sangiri/study/projects/desktop/build/Desktop_Qt_6_10_2-Debug/CMakeFiles/rebuild_cache.dir
-/mnt/other/sangiri/study/projects/desktop/build/Desktop_Qt_6_10_2-Debug/CMakeFiles/list_install_components.dir
-/mnt/other/sangiri/study/projects/desktop/build/Desktop_Qt_6_10_2-Debug/CMakeFiles/install.dir
-/mnt/other/sangiri/study/projects/desktop/build/Desktop_Qt_6_10_2-Debug/CMakeFiles/install/local.dir
-/mnt/other/sangiri/study/projects/desktop/build/Desktop_Qt_6_10_2-Debug/CMakeFiles/install/strip.dir
-/mnt/other/sangiri/study/projects/desktop/build/Desktop_Qt_6_10_2-Debug/CMakeFiles/desktop_autogen_timestamp_deps.dir
-/mnt/other/sangiri/study/projects/desktop/build/Desktop_Qt_6_10_2-Debug/CMakeFiles/desktop_autogen.dir
