@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"core/manager"
+	"core/file"
+	"core/links"
 	"core/models"
-	"core/service"
-	"core/utils"
 	"fmt"
 	"strings"
 )
@@ -16,20 +15,17 @@ func AddNodesHandler(url string) (string, error) {
 	}
 	
 	//get state variable
-	state, err := service.LoadState()
+	state, err := file.LoadState()
 	if err != nil {
 		return "error", fmt.Errorf("something went wrong while loading state: %w", err)
 	}
 	
 	//parseInput function call
-	result, err := utils.ParseInput(url_string)
-	
-	n := len(result.URLs)
-	//create nodes from parseResult urls
-	if n > 1 {
+	result, err := links.ParseURL(url_string)
 
-	} else if n == 1 {
-		new_node, err := manager.CreateNode(result.URLs[0], models.Source{
+	switch(result.SourseType) {
+	case models.SourceManual:
+		new_node, err := links.CreateNode(result.URLs[0], models.Source{
 			Type: result.SourseType,
 		})
 
@@ -38,19 +34,20 @@ func AddNodesHandler(url string) (string, error) {
 		}
 
 		//update struct State
-		node_key := utils.DeterministicID(new_node.Parsed)
+		node_key := links.GenerateDeterministicID(new_node.Parsed)
 		_, found := state.Nodes[node_key]
 		if found {
 			return "error", fmt.Errorf("node already exist")
 		}
 
-		state.Nodes[utils.DeterministicID(new_node.Parsed)] = new_node
-	} else {
-		return "error", fmt.Errorf("nothing to add")
+		state.Nodes[node_key] = new_node
+
+	case models.SourceSubscription:
+		//create subscription
 	}
 
 	//update file
-	if err = service.SaveState(state); err != nil {
+	if err = file.SaveState(state); err != nil {
 		return "error", err
 	}
 
