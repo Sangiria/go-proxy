@@ -1,4 +1,4 @@
-package utils
+package links
 
 import (
 	"core/models"
@@ -19,7 +19,7 @@ type parseResult struct {
 }
 
 //parsing the links the result is a ParseResult struct
-func ParseInput(s_url string) (*parseResult, error) {
+func ParseURL(s_url string) (*parseResult, error) {
 	u, err := url.Parse(s_url)
 	if err != nil {
 		return nil, err
@@ -41,11 +41,7 @@ func ParseInput(s_url string) (*parseResult, error) {
 	return nil, fmt.Errorf("unsupported scheme %s", u.Scheme)
 }
 
-func FetchVLESSLinks(u *url.URL) {
-
-}
-
-func ParseVLESS(url *url.URL, url_q url.Values) (*models.Parsed, error) {
+func ParseVLESSLink(url *url.URL, url_q url.Values) (*models.Parsed, error) {
 	var (
 		transport models.Transport
 		security models.Security

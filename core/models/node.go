@@ -22,14 +22,6 @@ const (
 	SourceSubscription = "subscription"
 )
 
-type Node struct {
-	// ID			string		`json:"id"`
-	Name		string		`json:"name"`
-	Source		Source		`json:"source"`
-	URL			string		`json:"url"`
-	Parsed		Parsed		`json:"parsed"`
-}
-
 type Source struct {
 	Type			SourceType	`json:"type"`
 	SubscriptionID	string		`json:"subscription_id,omitempty"`
@@ -50,4 +42,11 @@ type Parsed struct {
 	Path			string				`json:"path,omitempty"`
 	XHTTPMode		string				`json:"mode,omitempty"`
 	XHTTPExtra		json.RawMessage		`json:"extra,omitempty"`	
+}
+
+type Node struct {
+	// ID			string		`json:"id"`
+	Name		string		`json:"name"`
+	Source		Source		`json:"source"`
+	Parsed		Parsed		`json:"parsed"`
 }
