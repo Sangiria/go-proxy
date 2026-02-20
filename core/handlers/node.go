@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+func GetNodesHandler() {
+
+}
+
 func AddNodesHandler(url string) (string, error) {
 	url_string := strings.TrimSpace(url)
 	if url_string == "" {
@@ -25,25 +29,17 @@ func AddNodesHandler(url string) (string, error) {
 
 	switch(result.SourseType) {
 	case models.SourceManual:
-		new_node, err := links.CreateNode(result.URLs[0], models.Source{
-			Type: result.SourseType,
-		})
-
-		if err != nil {
+		if err := state.AddNodeFromURL(result.URLs[0], result.SourseType); err != nil {
 			return "error", err
 		}
 
-		//update struct State
-		node_key := links.GenerateDeterministicID(new_node.Parsed)
-		_, found := state.Nodes[node_key]
-		if found {
-			return "error", fmt.Errorf("node already exist")
-		}
-
-		state.Nodes[node_key] = new_node
-
 	case models.SourceSubscription:
-		//create subscription
+		
+		// for _, url := range result.URLs {
+		// 	if err := state.AddNodeFromURL(url, result.SourseType); err != nil {
+		// 		continue
+		// 	}
+		// }
 	}
 
 	//update file

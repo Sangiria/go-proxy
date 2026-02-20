@@ -28,26 +28,45 @@ func ParseURL(s_url string) (*parseResult, error) {
 	//reading url scheme
 	switch u.Scheme {
 	case "https":
-		//fetch vless urls
-		//return parseresult
+		links, err := FetchVLESSLinks(u.String())
+		if err != nil {
+			return nil, err
+		}
+
+		urls := make([]*url.URL, 0, len(links))
+
+		//parsing fetched links
+		for _, link := range links {
+			parsed, err := url.Parse(link)
+			if err != nil {
+				continue
+			}
+			urls = append(urls, parsed)
+		}	
+
+		return &parseResult{
+			URLs: urls,
+			SourseType: models.SourceSubscription,
+		}, nil
 	case "vless":
 		//return parseResult
 		return &parseResult{
 			URLs: []*url.URL{u},
 			SourseType: models.SourceManual,
 		}, nil
+	default:
+		return nil, fmt.Errorf("unsupported scheme %s", u.Scheme)
 	}
-
-	return nil, fmt.Errorf("unsupported scheme %s", u.Scheme)
 }
 
-func ParseVLESSLink(url *url.URL, url_q url.Values) (*models.Parsed, error) {
+func ParseVLESSLink(url *url.URL) (*models.Parsed, error) {
 	var (
 		transport models.Transport
 		security models.Security
 		path string
 		mode string
 		extra json.RawMessage
+		url_q = url.Query()
 	)
 
 	uuid_str := strings.TrimSpace(url.User.Username())

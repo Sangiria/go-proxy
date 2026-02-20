@@ -1,12 +1,55 @@
 package file
 
 import (
+	"core/links"
 	"core/models"
 	"encoding/json"
+	"fmt"
+	"net/url"
 	"os"
 )
 
-func SaveState(state *models.State) error {
+type State struct {
+	ActiveNodeId	string							`json:"active_node"`
+	Subscriptions	map[string]*models.Subscription	`json:"subscriptions"`
+	Nodes			map[string]*models.Node			`json:"nodes"`
+}
+
+func (s *State) IfNodeExists(node_key string) bool {
+	_, found := s.Nodes[node_key]
+	return found
+}
+
+func (s *State) AddNodeFromURL(url *url.URL, source_type models.SourceType) error {
+	parsed, err := links.ParseVLESSLink(url)
+	if err != nil {
+		return err
+	}
+
+	node_key := links.GenerateDeterministicID(*parsed)
+	if s.IfNodeExists(node_key) {
+		return fmt.Errorf("node already exist")
+	}
+
+	name := url.Fragment
+	if name == "" {
+		name = url.Host
+	}
+
+	new_node := &models.Node{
+		Name: name,
+		Source: models.Source{
+			Type: source_type,
+		},
+		Parsed: *parsed,
+	}
+
+	s.Nodes[node_key] = new_node
+
+	return nil
+}
+
+func SaveState(state *State) error {
 	file, err := os.OpenFile("./state/state.json", os.O_WRONLY|os.O_TRUNC, 0)
 	if err != nil {
 		return err
@@ -24,8 +67,8 @@ func SaveState(state *models.State) error {
 	return nil
 }
 
-//HandleAdd saves nodes and subscription if exists to file, sends [ok] if successfull (for now)
-func LoadState() (*models.State, error) {
+//HandleAdd saves nodes and subscription if exists to file
+func LoadState() (*State, error) {
 	//read state file if not create file
 
 	if _, err := os.Stat("./state"); os.IsNotExist(err) {
@@ -37,7 +80,7 @@ func LoadState() (*models.State, error) {
 
 	if _, err := os.Stat("./state/state.json"); os.IsNotExist(err) {
 		//create new file
-		new_state := models.State{
+		new_state := State{
 			ActiveNodeId: "",
 			Subscriptions: make(map[string]*models.Subscription),
 			Nodes: make(map[string]*models.Node),
@@ -53,7 +96,7 @@ func LoadState() (*models.State, error) {
 		return nil, err
 	}
 
-	var state models.State
+	var state State
 
 	//read existing file
 	file, err := os.ReadFile("./state/state.json")
