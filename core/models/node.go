@@ -45,7 +45,6 @@ type Parsed struct {
 }
 
 type Node struct {
-	// ID			string		`json:"id"`
 	Name		string		`json:"name"`
 	Source		Source		`json:"source"`
 	Parsed		Parsed		`json:"parsed"`

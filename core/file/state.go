@@ -15,19 +15,15 @@ type State struct {
 	Nodes			map[string]*models.Node			`json:"nodes"`
 }
 
-func (s *State) IfNodeExists(node_key string) bool {
-	_, found := s.Nodes[node_key]
-	return found
-}
-
-func (s *State) AddNodeFromURL(url *url.URL, source_type models.SourceType) error {
+func (s *State) AddNodeFromURL(url *url.URL, source *models.Source) error {
 	parsed, err := links.ParseVLESSLink(url)
 	if err != nil {
 		return err
 	}
 
-	node_key := links.GenerateDeterministicID(*parsed)
-	if s.IfNodeExists(node_key) {
+	node_key := links.GenerateID(links.ParsedToKey(*parsed))
+	_, found := s.Nodes[node_key]
+	if found {
 		return fmt.Errorf("node already exist")
 	}
 
@@ -38,9 +34,7 @@ func (s *State) AddNodeFromURL(url *url.URL, source_type models.SourceType) erro
 
 	new_node := &models.Node{
 		Name: name,
-		Source: models.Source{
-			Type: source_type,
-		},
+		Source: *source,
 		Parsed: *parsed,
 	}
 

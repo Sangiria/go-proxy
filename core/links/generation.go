@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func GenerateNodeKey(p models.Parsed) string {
+func ParsedToKey(p models.Parsed) string {
 	key := fmt.Sprintf(
 		"vless|%s|%d|%s|%s",
 		strings.ToLower(p.Address),
@@ -31,7 +31,7 @@ func GenerateNodeKey(p models.Parsed) string {
 	return key
 }
 
-func GenerateDeterministicID(p models.Parsed) string {
-	sum := sha256.Sum256([]byte(GenerateNodeKey(p)))
-	return "vless_" + hex.EncodeToString(sum[:16])
+func GenerateID(url string) string {
+	sum := sha256.Sum256([]byte(url))
+	return hex.EncodeToString((sum)[:16])
 }
