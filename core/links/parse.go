@@ -19,8 +19,8 @@ type parseResult struct {
 }
 
 //parsing the links the result is a ParseResult struct
-func ParseURL(s_url string) (*parseResult, error) {
-	u, err := url.Parse(s_url)
+func ParseURL(s string) (*parseResult, error) {
+	u, err := url.Parse(s)
 	if err != nil {
 		return nil, err
 	}
@@ -59,17 +59,17 @@ func ParseURL(s_url string) (*parseResult, error) {
 	}
 }
 
-func ParseVLESSLink(url *url.URL) (*models.Parsed, error) {
+func ParseVLESSLink(u *url.URL) (*models.Parsed, error) {
 	var (
 		transport models.Transport
 		security models.Security
 		path string
 		mode string
 		extra json.RawMessage
-		url_q = url.Query()
+		u_q = u.Query()
 	)
 
-	uuid_str := strings.TrimSpace(url.User.Username())
+	uuid_str := strings.TrimSpace(u.User.Username())
 	if uuid_str == "" {
 		return nil, errors.New("uuid required")
 	}
@@ -77,7 +77,7 @@ func ParseVLESSLink(url *url.URL) (*models.Parsed, error) {
 		return nil, errors.New("invalid uuid")
 	}
 
-	host, str_port := url.Hostname(), url.Port()
+	host, str_port := u.Hostname(), u.Port()
 	if host == "" || str_port == "" {
     	return nil, errors.New("missing host or port")
   	}
@@ -87,19 +87,19 @@ func ParseVLESSLink(url *url.URL) (*models.Parsed, error) {
 		return nil, errors.New("invalid port")
 	}
 
-	switch url_q.Get("type") {
+	switch u_q.Get("type") {
 	case "tcp", "":
 		transport = models.TransportTCP
 	case "xhttp":
 		transport = models.TransportXHTTP
-		p := url_q.Get("path")
+		p := u_q.Get("path")
 		if p == "" {
 			path = "/"
 		} else if !strings.HasPrefix(p, "/"){
 			path = "/" + p
 		}
 
-		m := url_q.Get("mode")
+		m := u_q.Get("mode")
 		if m == "" {
 			mode = "auto"
 		} else {
@@ -111,7 +111,7 @@ func ParseVLESSLink(url *url.URL) (*models.Parsed, error) {
 			}
 		}
 
-		raw_extra := url_q.Get("extra")
+		raw_extra := u_q.Get("extra")
 		if raw_extra != "" {
 			extra, err = parseExtra(raw_extra)
 			if err != nil {
@@ -119,22 +119,22 @@ func ParseVLESSLink(url *url.URL) (*models.Parsed, error) {
 			}
 		}
 	default:
-		return nil, fmt.Errorf("%s is unsupported transport", url_q.Get("type"))
+		return nil, fmt.Errorf("%s is unsupported transport", u_q.Get("type"))
 	}
 
-	switch url_q.Get("security") {
+	switch u_q.Get("security") {
 	case "reality":
 		security = models.SecurityReality
 		
 		required := []string{"sni", "fp", "pbk"}
 		for _, key := range required {
-			if strings.TrimSpace(url_q.Get(key)) == "" {
+			if strings.TrimSpace(u_q.Get(key)) == "" {
 				return nil, fmt.Errorf("missing %s", key)
     		}
 		}
 
-		if url_q.Get("sid") != "" {
-			if _, err := hex.DecodeString(url_q.Get("sid")); err != nil {
+		if u_q.Get("sid") != "" {
+			if _, err := hex.DecodeString(u_q.Get("sid")); err != nil {
 				return nil, fmt.Errorf("invalid sid")
 			}
 		}
@@ -150,20 +150,20 @@ func ParseVLESSLink(url *url.URL) (*models.Parsed, error) {
 		UUID: uuid_str,
 		Transport: transport,
 		Security: security,
-		Sni: url_q.Get("sni"),
-		Fp: url_q.Get("fp"),
-		Pbk: url_q.Get("pbk"),
-		Sid: url_q.Get("sid"),
-		Flow: url_q.Get("flow"),
-		Host: url_q.Get("host"),
+		Sni: u_q.Get("sni"),
+		Fp: u_q.Get("fp"),
+		Pbk: u_q.Get("pbk"),
+		Sid: u_q.Get("sid"),
+		Flow: u_q.Get("flow"),
+		Host: u_q.Get("host"),
 		Path: path,
 		XHTTPMode: mode,
 		XHTTPExtra: extra,
 	}, nil
 }
 
-func parseExtra(raw string) (json.RawMessage, error) {
-	decoded, err := url.QueryUnescape(raw)
+func parseExtra(r string) (json.RawMessage, error) {
+	decoded, err := url.QueryUnescape(r)
 	if err != nil {
 		return nil, fmt.Errorf("extra url decode failed: %s", err)
 	}

@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-func FetchVLESSLinks(url string) ([]string, error){
-	response, err := http.Get(url)
+func FetchVLESSLinks(u string) ([]string, error){
+	response, err := http.Get(u)
 	if err != nil {
 		return nil, fmt.Errorf("Error making request: %v\n", err)
 	}
