@@ -5,7 +5,6 @@ import (
 	"core/links"
 	"core/models"
 	"fmt"
-	"net/url"
 	"strings"
 )
 
@@ -14,6 +13,7 @@ func GetNodesHandler() {
 }
 
 func AddNodesHandler(s string) (string, error) {
+	//remove in the future
 	url_string := strings.TrimSpace(s)
 	if url_string == "" {
 		return "error", fmt.Errorf("empty url")
@@ -25,7 +25,7 @@ func AddNodesHandler(s string) (string, error) {
 		return "error", fmt.Errorf("something went wrong while loading state: %w", err)
 	}
 	
-	//parseInput function call
+	//parcing url and if https fetching nodes
 	result, err := links.ParseURL(url_string)
 
 	switch(result.SourseType) {
@@ -37,20 +37,9 @@ func AddNodesHandler(s string) (string, error) {
 		}
 
 	case models.SourceSubscription:
-		//create sub id
-		sub_key := links.GenerateID(url_string)
-		
-		//check if sub exist
-		_, found := state.Subscriptions[sub_key]
-		if found {
-			return "error", fmt.Errorf("subscription already exists")
-		}
-
-		//if not create
-		name, _ := url.Parse(url_string)
-		state.Subscriptions[sub_key] = &models.Subscription{
-			Name: name.Host,
-			URL: url_string,
+		sub_key, err := state.AddSubscriptionFromURL(url_string)
+		if err != nil {
+			return "error", err
 		}
 
 		for _, url := range result.URLs {

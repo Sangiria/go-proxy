@@ -15,8 +15,28 @@ type State struct {
 	Nodes			map[string]*models.Node			`json:"nodes"`
 }
 
-func (s *State) AddNodeFromURL(url *url.URL, source *models.Source) error {
-	parsed, err := links.ParseVLESSLink(url)
+func (s *State) AddSubscriptionFromURL(u string) (string, error) {
+	//create sub id
+	sub_key := links.GenerateID(u)
+		
+	//check if sub exist
+	_, found := s.Subscriptions[sub_key]
+	if found {
+		return "", fmt.Errorf("subscription already exists")
+	}
+
+	//if not create
+	name, _ := url.Parse(u)
+	s.Subscriptions[sub_key] = &models.Subscription{
+		Name: name.Host,
+		URL: u,
+	}
+
+	return sub_key, nil
+}
+
+func (s *State) AddNodeFromURL(u *url.URL, source *models.Source) error {
+	parsed, err := links.ParseVLESSLink(u)
 	if err != nil {
 		return err
 	}
@@ -27,9 +47,9 @@ func (s *State) AddNodeFromURL(url *url.URL, source *models.Source) error {
 		return fmt.Errorf("node already exist")
 	}
 
-	name := url.Fragment
+	name := u.Fragment
 	if name == "" {
-		name = url.Host
+		name = u.Host
 	}
 
 	new_node := &models.Node{
@@ -43,7 +63,7 @@ func (s *State) AddNodeFromURL(url *url.URL, source *models.Source) error {
 	return nil
 }
 
-func SaveState(state *State) error {
+func SaveState(s *State) error {
 	file, err := os.OpenFile("./state/state.json", os.O_WRONLY|os.O_TRUNC, 0)
 	if err != nil {
 		return err
@@ -54,7 +74,7 @@ func SaveState(state *State) error {
 	enc.SetEscapeHTML(false)
 	enc.SetIndent("", "\t")
 
-	if err := enc.Encode(state); err != nil {
+	if err := enc.Encode(s); err != nil {
 		return err
 	}
 

@@ -31,7 +31,7 @@ func ParsedToKey(p models.Parsed) string {
 	return key
 }
 
-func GenerateID(url string) string {
-	sum := sha256.Sum256([]byte(url))
+func GenerateID(s string) string {
+	sum := sha256.Sum256([]byte(s))
 	return hex.EncodeToString((sum)[:16])
 }
