@@ -16,3 +16,17 @@ message Nodes {
   repeated Node nodes = 1;
 }
 
+message AddNodeRequest {
+    string url = 1;
+}
+
+//add field "number of the added nodes"
+message AddNodeResponse {
+    uint code = 1;
+    optional string message = 1;
+}
+
+service Nodes {
+    rpc AddNode (AddNodeRequest) returns (AddNodeResponse);
+    rpc GetNodes () returns (Nodes);
+}
