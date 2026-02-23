@@ -2,7 +2,6 @@ package links
 
 import (
 	"core/models"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -61,10 +60,6 @@ func ParseURL(s string) (*parseResult, error) {
 
 func ParseVLESSLink(u *url.URL) (*models.Parsed, error) {
 	var (
-		transport models.Transport
-		security models.Security
-		path string
-		mode string
 		extra json.RawMessage
 		u_q = u.Query()
 	)
@@ -87,77 +82,28 @@ func ParseVLESSLink(u *url.URL) (*models.Parsed, error) {
 		return nil, errors.New("invalid port")
 	}
 
-	switch u_q.Get("type") {
-	case "tcp", "":
-		transport = models.TransportTCP
-	case "xhttp":
-		transport = models.TransportXHTTP
-		p := u_q.Get("path")
-		if p == "" {
-			path = "/"
-		} else if !strings.HasPrefix(p, "/"){
-			path = "/" + p
+	raw_extra := u_q.Get("extra")
+	if raw_extra != "" {
+		extra, err = parseExtra(raw_extra)
+		if err != nil {
+			return nil, err
 		}
-
-		m := u_q.Get("mode")
-		if m == "" {
-			mode = "auto"
-		} else {
-			switch m {
-			case "auto", "packet", "stream":
-				mode = m
-			default:
-				return nil, fmt.Errorf("unsupported xhttp mode %s", m)
-			}
-		}
-
-		raw_extra := u_q.Get("extra")
-		if raw_extra != "" {
-			extra, err = parseExtra(raw_extra)
-			if err != nil {
-				return nil, err
-			}
-		}
-	default:
-		return nil, fmt.Errorf("%s is unsupported transport", u_q.Get("type"))
-	}
-
-	switch u_q.Get("security") {
-	case "reality":
-		security = models.SecurityReality
-		
-		required := []string{"sni", "fp", "pbk"}
-		for _, key := range required {
-			if strings.TrimSpace(u_q.Get(key)) == "" {
-				return nil, fmt.Errorf("missing %s", key)
-    		}
-		}
-
-		if u_q.Get("sid") != "" {
-			if _, err := hex.DecodeString(u_q.Get("sid")); err != nil {
-				return nil, fmt.Errorf("invalid sid")
-			}
-		}
-	case "":
-		security = models.SecurityNone
-	default:
-		return nil, errors.New("unsupported security")
 	}
 
 	return &models.Parsed{
 		Address: host,
 		Port: uint16(port),
 		UUID: uuid_str,
-		Transport: transport,
-		Security: security,
+		Transport: u_q.Get("type"),
+		Security: u_q.Get("security"),
 		Sni: u_q.Get("sni"),
 		Fp: u_q.Get("fp"),
 		Pbk: u_q.Get("pbk"),
 		Sid: u_q.Get("sid"),
 		Flow: u_q.Get("flow"),
 		Host: u_q.Get("host"),
-		Path: path,
-		XHTTPMode: mode,
+		Path: u_q.Get("path"),
+		XHTTPMode: u_q.Get("mode"),
 		XHTTPExtra: extra,
 	}, nil
 }

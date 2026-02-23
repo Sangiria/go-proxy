@@ -17,9 +17,10 @@ func ParsedToKey(p models.Parsed) string {
 		string(p.Transport),
 	)
 
-	if p.Security == models.SecurityReality {
+	if p.Security != "" {
 		key += fmt.Sprintf(
-			"|security=reality|sni=%s|fp=%s|pbk=%s|sid=%s|flow=%s",
+			"|security=%s|sni=%s|fp=%s|pbk=%s|sid=%s|flow=%s",
+			p.Security,
 			strings.ToLower(p.Sni),
 			p.Fp,
 			p.Pbk,

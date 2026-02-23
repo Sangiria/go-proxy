@@ -50,8 +50,8 @@ type VlessUser struct {
 }
 
 type StreamSettings struct {
-  	Network         Transport          	`json:"network"`					//for now tcp or xhttp only
-  	Security        Security          	`json:"security,omitempty"`			//for now reality only
+  	Network         string          	`json:"network"`					//for now tcp or xhttp only
+  	Security        string          	`json:"security,omitempty"`			//for now reality only
   	RealitySettings *RealitySettings 	`json:"realitySettings,omitempty"`
 	XttpSettings	*XttpSettings		`json:"xhttpSettings,omitempty"` 	//if transport is xhttp (tcp is the default)
 }
