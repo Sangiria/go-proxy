@@ -4,18 +4,6 @@ import (
 	"encoding/json"
 )
 
-type Transport string
-const (
-	TransportTCP  Transport = "tcp"
-	TransportXHTTP Transport = "xhttp"
-)
-
-type Security string
-const (
-	SecurityNone   Security = ""
-	SecurityReality Security = "reality"
-)
-
 type SourceType string
 const (
 	SourceManual = "manual"
@@ -31,8 +19,8 @@ type Parsed struct {
 	Address			string				`json:"address"`
 	Port			uint16				`json:"port"`
 	UUID			string				`json:"uuid"`
-	Transport		Transport			`json:"transport"`
-	Security		Security			`json:"security,omitempty"`
+	Transport		string				`json:"transport"`
+	Security		string				`json:"security,omitempty"`
 	Sni				string				`json:"sni,omitempty"`
 	Fp				string				`json:"fp,omitempty"`
 	Pbk				string				`json:"pbk,omitempty"`
