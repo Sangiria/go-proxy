@@ -5,7 +5,10 @@ import (
 	"core/links"
 	"core/models"
 	"fmt"
+	"log"
+	"os"
 	"strings"
+	"time"
 )
 
 func GetNodesHandler() {
@@ -53,9 +56,23 @@ func AddNodesHandler(s string) (string, error) {
 	}
 
 	//update file
+	t0 := time.Now()
 	if err = file.SaveState(state); err != nil {
 		return "error", err
 	}
+	dt := time.Since(t0)
+	info, err := os.Stat("./state/state.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	size := info.Size()
+
+	fmt.Printf("Size: %d bytes (%.2f KiB)\n", size, float64(size)/1024)
+	fmt.Printf("Time: %v\n", dt)
+
+	speed := float64(size) / dt.Seconds() / 1024
+	fmt.Printf("Speed: %.2f KiB/s\n", speed)
 
 	return "ok", nil
 }

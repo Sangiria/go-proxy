@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package goproxy;
+
+message Node {
+  string id = 1;
+  string type = 2;
+  string address = 3;
+  int16 port = 4;
+  string transport = 5;
+  string tls = 6;
+  string source = 7;
+}
+
+message Nodes {
+  repeated Node nodes = 1;
+}
+
