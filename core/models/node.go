@@ -16,6 +16,7 @@ type Source struct {
 }
 
 type Parsed struct {
+	Type			string				`json:"type"`
 	Address			string				`json:"address"`
 	Port			uint16				`json:"port"`
 	UUID			string				`json:"uuid"`

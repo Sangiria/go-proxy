@@ -91,6 +91,7 @@ func ParseVLESSLink(u *url.URL) (*models.Parsed, error) {
 	}
 
 	return &models.Parsed{
+		Type: u.Scheme,
 		Address: host,
 		Port: uint16(port),
 		UUID: uuid_str,

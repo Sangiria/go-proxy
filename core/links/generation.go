@@ -10,7 +10,8 @@ import (
 
 func ParsedToKey(p models.Parsed) string {
 	key := fmt.Sprintf(
-		"vless|%s|%d|%s|%s",
+		"%s|%s|%d|%s|%s",
+		p.Type,
 		strings.ToLower(p.Address),
 		p.Port,
 		p.UUID,
