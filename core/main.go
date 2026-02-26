@@ -1,30 +1,23 @@
 package main
 
 import (
-	"bufio"
-	"core/handlers"
-	"fmt"
 	"log"
-	"os"
+	"net"
+
+	"google.golang.org/grpc"
 )
 
-var xrayPath = "./bin/xray"
-var configPath = "config.json"
+// var xrayPath = "./bin/xray"
+// var configPath = "config.json"
 
 func main() {
-	fmt.Print("Enter url: ")
-  	reader := bufio.NewReader(os.Stdin)
-  	line, err := reader.ReadString('\n')
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    fmt.Printf("read line: %s\n", line)
-
-	answer, err := handlers.AddNodesHandler(line)
+	lis, err := net.Listen("tcp", ":3333")
 	if err != nil {
-		fmt.Printf("%s:%s",answer, err)
+  		log.Fatalf("failed to listen: %v", err)
 	}
 
-	fmt.Printf(answer)
+	grpcServer := grpc.NewServer()
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to serve gRPC server: %v", err)
+	}
 }

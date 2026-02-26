@@ -15,9 +15,11 @@ type State struct {
 	Nodes			map[string]*models.Node			`json:"nodes"`
 }
 
-func (s *State) AddSubscriptionFromURL(u string) (string, error) {
+func (s *State) CheckExistence ()
+
+func (s *State) AddSubscriptionFromURL(u_s string) (string, error) {
 	//create sub id
-	sub_key := links.GenerateID(u)
+	sub_key := links.GenerateID(u_s)
 		
 	//check if sub exist
 	_, found := s.Subscriptions[sub_key]
@@ -26,16 +28,21 @@ func (s *State) AddSubscriptionFromURL(u string) (string, error) {
 	}
 
 	//if not create
-	name, _ := url.Parse(u)
+	name, _ := url.Parse(u_s)
 	s.Subscriptions[sub_key] = &models.Subscription{
 		Name: name.Host,
-		URL: u,
+		URL: u_s,
 	}
 
 	return sub_key, nil
 }
 
-func (s *State) AddNodeFromURL(u *url.URL, source *models.Source) error {
+func (s *State) AddNodeFromURL(u_s string, source *models.Source) error {
+	u, err := url.Parse(u_s)
+	if err != nil {
+		return err
+	}
+
 	parsed, err := links.ParseVLESSLink(u)
 	if err != nil {
 		return err

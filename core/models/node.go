@@ -4,14 +4,8 @@ import (
 	"encoding/json"
 )
 
-type SourceType string
-const (
-	SourceManual = "manual"
-	SourceSubscription = "subscription"
-)
-
 type Source struct {
-	Type			SourceType	`json:"type"`
+	Type			string		`json:"type"`
 	SubscriptionID	string		`json:"subscription_id,omitempty"`
 }
 

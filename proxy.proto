@@ -2,14 +2,22 @@ syntax = "proto3";
 
 package goproxy;
 
+option go_package = "./core/api";
+
+enum Source {
+  Manual = 0;
+  Subscription = 1;
+}
+
 message Node {
   string id = 1;
   string type = 2;
-  string address = 3;
-  int16 port = 4;
-  string transport = 5;
-  string tls = 6;
-  string source = 7;
+  string name = 3;
+  string address = 4;
+  int32 port = 5;
+  string transport = 6;
+  string tls = 7;
+  string source = 8;
 }
 
 message Nodes {
@@ -17,16 +25,17 @@ message Nodes {
 }
 
 message AddNodeRequest {
-    string url = 1;
+  string url = 1;
+  Source source = 2;
 }
 
 //add field "number of the added nodes"
 message AddNodeResponse {
-    uint code = 1;
-    optional string message = 1;
 }
 
-service Nodes {
-    rpc AddNode (AddNodeRequest) returns (AddNodeResponse);
-    rpc GetNodes () returns (Nodes);
+message Null {}
+
+service NodeService {
+  rpc AddNode (AddNodeRequest) returns (AddNodeResponse);
+  rpc GetNodes (Null) returns (Nodes);
 }
