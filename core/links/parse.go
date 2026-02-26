@@ -12,52 +12,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type parseResult struct {
-	URLs			[]*url.URL
-	SourseType		models.SourceType
-}
-
-//parsing the links the result is a ParseResult struct
-func ParseURL(s string) (*parseResult, error) {
-	u, err := url.Parse(s)
-	if err != nil {
-		return nil, err
-	}
-
-	//reading url scheme
-	switch u.Scheme {
-	case "https":
-		links, err := FetchVLESSLinks(u.String())
-		if err != nil {
-			return nil, err
-		}
-
-		urls := make([]*url.URL, 0, len(links))
-
-		//parsing fetched links
-		for _, link := range links {
-			parsed, err := url.Parse(link)
-			if err != nil {
-				continue
-			}
-			urls = append(urls, parsed)
-		}	
-
-		return &parseResult{
-			URLs: urls,
-			SourseType: models.SourceSubscription,
-		}, nil
-	case "vless":
-		//return parseResult
-		return &parseResult{
-			URLs: []*url.URL{u},
-			SourseType: models.SourceManual,
-		}, nil
-	default:
-		return nil, fmt.Errorf("unsupported scheme %s", u.Scheme)
-	}
-}
-
 func ParseVLESSLink(u *url.URL) (*models.Parsed, error) {
 	var (
 		extra json.RawMessage
