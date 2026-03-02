@@ -4,11 +4,6 @@ package goproxy;
 
 option go_package = "./core/api";
 
-enum Source {
-  Manual = 0;
-  Subscription = 1;
-}
-
 message Node {
   string id = 1;
   string type = 2;
@@ -26,7 +21,6 @@ message Nodes {
 
 message AddNodeRequest {
   string url = 1;
-  Source source = 2;
 }
 
 //add field "number of the added nodes"
@@ -37,5 +31,6 @@ message Null {}
 
 service NodeService {
   rpc AddNode (AddNodeRequest) returns (AddNodeResponse);
+  rpc AddSubcription (AddNodeRequest) returns (AddNodeResponse);
   rpc GetNodes (Null) returns (Nodes);
 }

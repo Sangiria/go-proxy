@@ -1,11 +1,8 @@
 package file
 
 import (
-	"core/links"
 	"core/models"
 	"encoding/json"
-	"fmt"
-	"net/url"
 	"os"
 )
 
@@ -13,61 +10,6 @@ type State struct {
 	ActiveNodeId	string							`json:"active_node"`
 	Subscriptions	map[string]*models.Subscription	`json:"subscriptions"`
 	Nodes			map[string]*models.Node			`json:"nodes"`
-}
-
-func (s *State) CheckExistence ()
-
-func (s *State) AddSubscriptionFromURL(u_s string) (string, error) {
-	//create sub id
-	sub_key := links.GenerateID(u_s)
-		
-	//check if sub exist
-	_, found := s.Subscriptions[sub_key]
-	if found {
-		return "", fmt.Errorf("subscription already exists")
-	}
-
-	//if not create
-	name, _ := url.Parse(u_s)
-	s.Subscriptions[sub_key] = &models.Subscription{
-		Name: name.Host,
-		URL: u_s,
-	}
-
-	return sub_key, nil
-}
-
-func (s *State) AddNodeFromURL(u_s string, source *models.Source) error {
-	u, err := url.Parse(u_s)
-	if err != nil {
-		return err
-	}
-
-	parsed, err := links.ParseVLESSLink(u)
-	if err != nil {
-		return err
-	}
-
-	node_key := links.GenerateID(links.ParsedToKey(*parsed))
-	_, found := s.Nodes[node_key]
-	if found {
-		return fmt.Errorf("node already exist")
-	}
-
-	name := u.Fragment
-	if name == "" {
-		name = u.Host
-	}
-
-	new_node := &models.Node{
-		Name: name,
-		Source: *source,
-		Parsed: *parsed,
-	}
-
-	s.Nodes[node_key] = new_node
-
-	return nil
 }
 
 func SaveState(s *State) error {

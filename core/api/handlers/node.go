@@ -6,77 +6,86 @@ import (
 	"core/file"
 	"core/links"
 	"core/models"
-	"fmt"
-	"log"
-	"os"
-	"time"
+	"net/url"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type NodeService struct {
-
+	state *file.State
 }
 
-func GetNodesHandler() {
-
+func NewNodeService() (*NodeService, error) {
+    state, err := file.LoadState()
+    if err != nil {
+        return nil, err
+    }
+    return &NodeService{state: state}, nil
 }
-
-//TODO: better error handling and id generation
 
 func (n *NodeService) AddNodeHandler(ctx context.Context, message *api.AddNodeRequest) (*api.AddNodeResponse, error) {
-	//get state variable
-	state, err := file.LoadState()
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "something went wrong while loading state: %s", err)
-	}
+	node_key := links.GenerateID(message.Url)
 	
-	//parcing url and if https fetching nodes
-	switch(message.Source) {
-	case api.Source_Manual:
-		if err := state.AddNodeFromURL(message.Url, &models.Source{
-			Type: message.Source.String(),
-		}); err != nil {
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-
-	case api.Source_Subscription:
-		sub_key, err := state.AddSubscriptionFromURL(message.Url)
-		if err != nil {
-			return nil, status.Error(codes.AlreadyExists, err.Error())
-		}
-
-		links, err := links.FetchVLESSLinks(message.Url)
-
-		for _, link := range links{
-			if err := state.AddNodeFromURL(link, &models.Source{
-				Type: message.Source.String(),
-				SubscriptionID: sub_key,
-			}); err != nil {
-				continue
-			}
-		}
+	_, found := n.state.Nodes[node_key]
+	if found {
+		return nil, status.Errorf(codes.AlreadyExists, "node already exist")
 	}
 
-	//update file
-	t0 := time.Now()
-	if err = file.SaveState(state); err != nil {
+	node, err := links.ParseURLToNode(message.Url, &models.Source{
+		Type: models.SourceManual,
+	})
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	n.state.Nodes[node_key] = node
+
+	return &api.AddNodeResponse{}, nil
+}
+
+func (n *NodeService) AddSubscriptionHandler(ctx context.Context, message *api.AddNodeRequest) (*api.AddNodeResponse, error) {
+	sub_key := links.GenerateID(message.Url)
+
+	_, found := n.state.Subscriptions[sub_key]
+	if found {
+		return nil, status.Errorf(codes.AlreadyExists, "subscription already exists")
+	}
+
+	name, err := url.Parse(message.Url)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	n.state.Subscriptions[sub_key] = &models.Subscription{
+		Name: name.Host,
+		URL: message.Url,
+	}
+
+	node_links, err := links.FetchVLESSLinks(message.Url)
+
+	for _, link := range node_links{
+		node_key := links.GenerateID(link)
+
+		if _, found := n.state.Nodes[node_key]; found {
+			continue
+		}
+
+		node, err := links.ParseURLToNode(link, &models.Source{
+			Type: models.SourceManual,
+			SubscriptionID: sub_key,
+		})
+
+		if err != nil {
+			continue
+		}
+
+		n.state.Nodes[node_key] = node
+	}
+
+	if err = file.SaveState(n.state); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	dt := time.Since(t0)
-	info, err := os.Stat("./state/state.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	size := info.Size()
-
-	fmt.Printf("Size: %d bytes (%.2f KiB)\n", size, float64(size)/1024)
-	fmt.Printf("Time: %v\n", dt)
-
-	speed := float64(size) / dt.Seconds() / 1024
-	fmt.Printf("Speed: %.2f KiB/s\n", speed)
 
 	return &api.AddNodeResponse{}, nil
 }
