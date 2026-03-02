@@ -12,7 +12,31 @@ import (
 	"github.com/google/uuid"
 )
 
-func ParseVLESSLink(u *url.URL) (*models.Parsed, error) {
+func ParseURLToNode(s string, source *models.Source) (*models.Node, error) {
+	u, err := url.Parse(s)
+	if err != nil {
+		return nil, err
+	}
+
+	//check for valid node url
+	parsed, err := ParseNodeURL(u)
+	if err != nil {
+		return nil, err
+	}
+
+	name := u.Fragment
+	if name == "" {
+		name = u.Host
+	}
+
+	return &models.Node{
+		Name: name,
+		Source: *source,
+		Parsed: *parsed,
+	}, nil
+}
+
+func ParseNodeURL(u *url.URL) (*models.Parsed, error) {
 	var (
 		extra json.RawMessage
 		u_q = u.Query()
