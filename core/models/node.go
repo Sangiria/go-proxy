@@ -10,11 +10,6 @@ const (
 	SourceSubscription = "subcription"
 )
 
-type Source struct {
-	Type			SourceType	`json:"type"`
-	SubscriptionID	string		`json:"subscription_id,omitempty"`
-}
-
 type Parsed struct {
 	Type			string				`json:"type"`
 	Address			string				`json:"address"`
@@ -37,4 +32,9 @@ type Node struct {
 	Name		string		`json:"name"`
 	Source		Source		`json:"source"`
 	Parsed		Parsed		`json:"parsed"`
+}
+
+type Source struct {
+	Type			SourceType	`json:"type"`
+	SubscriptionID	string		`json:"subscription_id,omitempty"`
 }

@@ -31,6 +31,6 @@ message Null {}
 
 service NodeService {
   rpc AddNode (AddNodeRequest) returns (AddNodeResponse);
-  rpc AddSubcription (AddNodeRequest) returns (AddNodeResponse);
+  rpc AddSubscription (AddNodeRequest) returns (AddNodeResponse);
   rpc GetNodes (Null) returns (Nodes);
 }
