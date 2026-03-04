@@ -13,6 +13,7 @@ import (
 )
 
 type NodeService struct {
+	api.UnimplementedNodeServiceServer
 	state *file.State
 }
 
@@ -24,7 +25,7 @@ func NewNodeService() (*NodeService, error) {
     return &NodeService{state: state}, nil
 }
 
-func (n *NodeService) AddNodeHandler(ctx context.Context, message *api.AddNodeRequest) (*api.AddNodeResponse, error) {
+func (n *NodeService) AddNode(ctx context.Context, message *api.AddNodeRequest) (*api.AddNodeResponse, error) {
 	node_key := links.GenerateID(message.Url)
 	
 	_, found := n.state.Nodes[node_key]
@@ -41,10 +42,14 @@ func (n *NodeService) AddNodeHandler(ctx context.Context, message *api.AddNodeRe
 
 	n.state.Nodes[node_key] = node
 
+	if err = file.SaveState(n.state); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &api.AddNodeResponse{}, nil
 }
 
-func (n *NodeService) AddSubscriptionHandler(ctx context.Context, message *api.AddNodeRequest) (*api.AddNodeResponse, error) {
+func (n *NodeService) AddSubscription(ctx context.Context, message *api.AddNodeRequest) (*api.AddNodeResponse, error) {
 	sub_key := links.GenerateID(message.Url)
 
 	_, found := n.state.Subscriptions[sub_key]
@@ -66,13 +71,12 @@ func (n *NodeService) AddSubscriptionHandler(ctx context.Context, message *api.A
 
 	for _, link := range node_links{
 		node_key := links.GenerateID(link)
-
 		if _, found := n.state.Nodes[node_key]; found {
 			continue
 		}
 
 		node, err := links.ParseURLToNode(link, &models.Source{
-			Type: models.SourceManual,
+			Type: models.SourceSubscription,
 			SubscriptionID: sub_key,
 		})
 

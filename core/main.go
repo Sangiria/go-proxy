@@ -1,6 +1,8 @@
 package main
 
 import (
+	"core/api"
+	"core/api/handlers"
 	"log"
 	"net"
 
@@ -17,6 +19,13 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
+	node, err := handlers.NewNodeService()
+	if err != nil {
+		log.Fatalf("failed to create node service: %v", err)
+	}
+
+	api.RegisterNodeServiceServer(grpcServer, node)
+
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve gRPC server: %v", err)
 	}
