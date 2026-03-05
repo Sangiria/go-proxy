@@ -25,6 +25,27 @@ func NewNodeService() (*NodeService, error) {
     return &NodeService{state: state}, nil
 }
 
+func (n *NodeService) GetNodes(ctx context.Context, message *api.Null) (*api.Nodes, error) {
+	nodes := make([]*api.Node, 0, len(n.state.Nodes))
+
+	for id, node := range n.state.Nodes {
+		nodes = append(nodes, &api.Node{
+			Id: id,
+			Type: node.Parsed.Type,
+			Name: node.Name,
+			Address: node.Parsed.Address,
+			Port: int32(node.Parsed.Port),
+			Transport: node.Parsed.Transport,
+			Tls: node.Parsed.Security,
+			Source: string(node.Source.Type),
+		})
+	}
+
+	return &api.Nodes{
+		Nodes: nodes,
+	}, nil
+}
+
 func (n *NodeService) AddNode(ctx context.Context, message *api.AddNodeRequest) (*api.AddNodeResponse, error) {
 	node_key := links.GenerateID(message.Url)
 	
@@ -48,6 +69,10 @@ func (n *NodeService) AddNode(ctx context.Context, message *api.AddNodeRequest) 
 
 	return &api.AddNodeResponse{}, nil
 }
+
+//TODO: вынести получение нод подписок и их добавление в state в отдельный rpc метод
+//TODO: прибавлять айди подписки к ключу ноды при генерации айди
+//TODO: возвращать при ответе количество добавленных нодов и количество всего полученных нодов из ссылки
 
 func (n *NodeService) AddSubscription(ctx context.Context, message *api.AddNodeRequest) (*api.AddNodeResponse, error) {
 	sub_key := links.GenerateID(message.Url)
