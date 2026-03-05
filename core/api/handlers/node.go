@@ -25,6 +25,24 @@ func NewNodeService() (*NodeService, error) {
     return &NodeService{state: state}, nil
 }
 
+func (n *NodeService) storeNode(url string, source *models.Source) error {
+	node_key := links.GenerateID(url)
+	
+	_, found := n.state.Nodes[node_key]
+	if found {
+		return status.Errorf(codes.AlreadyExists, "node already exist")
+	}
+
+	node, err := links.ParseURLToNode(url, source)
+	if err != nil {
+		return status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	n.state.Nodes[node_key] = node
+
+	return nil
+}
+
 func (n *NodeService) GetNodes(ctx context.Context, message *api.Null) (*api.Nodes, error) {
 	nodes := make([]*api.Node, 0, len(n.state.Nodes))
 
@@ -46,35 +64,58 @@ func (n *NodeService) GetNodes(ctx context.Context, message *api.Null) (*api.Nod
 	}, nil
 }
 
-func (n *NodeService) AddNode(ctx context.Context, message *api.AddNodeRequest) (*api.AddNodeResponse, error) {
-	node_key := links.GenerateID(message.Url)
-	
-	_, found := n.state.Nodes[node_key]
-	if found {
-		return nil, status.Errorf(codes.AlreadyExists, "node already exist")
-	}
-
-	node, err := links.ParseURLToNode(message.Url, &models.Source{
+func (n *NodeService) AddNode(ctx context.Context, message *api.Url) (*api.AddedNodesCount, error) {
+	if err := n.storeNode(message.Url, &models.Source{
 		Type: models.SourceManual,
-	})
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}); err != nil {
+		return nil, err
 	}
 
-	n.state.Nodes[node_key] = node
+	if err := file.SaveState(n.state); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &api.AddedNodesCount{
+		Added: 1,
+		Received: 1,
+	}, nil
+}
+
+//TODO: вынести получение нод подписок и их добавление в state в отдельный rpc метод ✅
+//TODO: прибавлять айди подписки к ключу ноды при генерации айди ✅
+//TODO: возвращать при ответе количество добавленных нодов и количество всего полученных нодов из ссылки ✅
+
+func (n *NodeService) FetchSubscriptionNodes(ctx context.Context, message *api.SubscriptionId) (*api.AddedNodesCount, error) {
+	url := n.state.Subscriptions[message.Id].URL
+	node_links, err := links.FetchVLESSLinks(url)
+
+	var (
+		added = 0
+		recieved = len(node_links)
+	)
+
+	for _, link := range node_links{
+		if err := n.storeNode(link, &models.Source{
+			Type: models.SourceSubscription,
+			SubscriptionID: message.Id,
+		}); err != nil {
+			continue
+		}
+
+		added++
+	}
 
 	if err = file.SaveState(n.state); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &api.AddNodeResponse{}, nil
+	return &api.AddedNodesCount{
+		Added: int64(added),
+		Received: int64(recieved),
+	}, nil
 }
 
-//TODO: вынести получение нод подписок и их добавление в state в отдельный rpc метод
-//TODO: прибавлять айди подписки к ключу ноды при генерации айди
-//TODO: возвращать при ответе количество добавленных нодов и количество всего полученных нодов из ссылки
-
-func (n *NodeService) AddSubscription(ctx context.Context, message *api.AddNodeRequest) (*api.AddNodeResponse, error) {
+func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*api.SubscriptionId, error) {
 	sub_key := links.GenerateID(message.Url)
 
 	_, found := n.state.Subscriptions[sub_key]
@@ -92,29 +133,7 @@ func (n *NodeService) AddSubscription(ctx context.Context, message *api.AddNodeR
 		URL: message.Url,
 	}
 
-	node_links, err := links.FetchVLESSLinks(message.Url)
-
-	for _, link := range node_links{
-		node_key := links.GenerateID(link)
-		if _, found := n.state.Nodes[node_key]; found {
-			continue
-		}
-
-		node, err := links.ParseURLToNode(link, &models.Source{
-			Type: models.SourceSubscription,
-			SubscriptionID: sub_key,
-		})
-
-		if err != nil {
-			continue
-		}
-
-		n.state.Nodes[node_key] = node
-	}
-
-	if err = file.SaveState(n.state); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return &api.AddNodeResponse{}, nil
+	return &api.SubscriptionId{
+		Id: sub_key,
+	}, nil
 }

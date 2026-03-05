@@ -19,18 +19,24 @@ message Nodes {
   repeated Node nodes = 1;
 }
 
-message AddNodeRequest {
+message Url {
   string url = 1;
 }
 
-//add field "number of the added nodes"
-message AddNodeResponse {
+message AddedNodesCount {
+  int64 added = 1;
+  int64 received = 2;
+}
+
+message SubscriptionId {
+  string id = 1;
 }
 
 message Null {}
 
 service NodeService {
-  rpc AddNode (AddNodeRequest) returns (AddNodeResponse);
-  rpc AddSubscription (AddNodeRequest) returns (AddNodeResponse);
+  rpc AddNode (Url) returns (AddedNodesCount);
+  rpc AddSubscription (Url) returns (SubscriptionId);
+  rpc FetchSubscriptionNodes (SubscriptionId) returns (AddedNodesCount);
   rpc GetNodes (Null) returns (Nodes);
 }
