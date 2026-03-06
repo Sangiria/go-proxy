@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package goproxy;
 
-option go_package = "./core/api";
-
 message Node {
   string id = 1;
   string type = 2;

@@ -1,3 +1,6 @@
 bin
 config.json
 /core/state/
+.vscode
+/desktop/build/
+/desktop/.qtcreator/
