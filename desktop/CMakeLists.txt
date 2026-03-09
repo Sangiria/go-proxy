@@ -14,9 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROTO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
 set(PROTO_FILE "${PROTO_DIR}/proxy.proto")
-set(GEN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/client")
-
-file(MAKE_DIRECTORY "${GEN_DIR}")
+set(GEN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/client/generated")
 
 add_custom_command(
     OUTPUT "${GEN_DIR}/proxy.pb.cc" 
