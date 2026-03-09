@@ -81,10 +81,6 @@ func (n *NodeService) AddNode(ctx context.Context, message *api.Url) (*api.Added
 	}, nil
 }
 
-//TODO: вынести получение нод подписок и их добавление в state в отдельный rpc метод ✅
-//TODO: прибавлять айди подписки к ключу ноды при генерации айди ✅
-//TODO: возвращать при ответе количество добавленных нодов и количество всего полученных нодов из ссылки ✅
-
 func (n *NodeService) FetchSubscriptionNodes(ctx context.Context, message *api.SubscriptionId) (*api.AddedNodesCount, error) {
 	url := n.state.Subscriptions[message.Id].URL
 	node_links, err := links.FetchVLESSLinks(url)
