@@ -10,31 +10,20 @@ message Node {
   int32 port = 5;
   string transport = 6;
   string tls = 7;
-  string source = 8;
 }
 
-message Nodes {
-  repeated Node nodes = 1;
+message Subscription {
+  string id = 1;
+  string name = 2;
+  repeated Node nodes = 3;
 }
 
 message Url {
   string url = 1;
 }
 
-message AddedNodesCount {
-  int64 added = 1;
-  int64 received = 2;
-}
-
-message SubscriptionId {
-  string id = 1;
-}
-
-message Null {}
-
 service NodeService {
-  rpc AddNode (Url) returns (AddedNodesCount);
-  rpc AddSubscription (Url) returns (SubscriptionId);
-  rpc FetchSubscriptionNodes (SubscriptionId) returns (AddedNodesCount);
-  rpc GetNodes (Null) returns (Nodes);
+  rpc AddManual (Url) returns (Node);
+  rpc AddSubscription (Url) returns (Subscription);
+  //rpc GetFullState
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func ParseURLToNode(s string, source *models.Source) (*models.Node, error) {
+func ParseURLToNode(s string) (*models.Node, error) {
 	u, err := url.Parse(s)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,6 @@ func ParseURLToNode(s string, source *models.Source) (*models.Node, error) {
 
 	return &models.Node{
 		Name: name,
-		Source: *source,
 		Parsed: *parsed,
 	}, nil
 }
