@@ -17,6 +17,18 @@ type NodeService struct {
 	state *file.State
 }
 
+func mapToApiNode(id string, node *models.Node) *api.Node {
+    return &api.Node{
+        Id:        id,
+        Type:      node.Parsed.Type,
+        Name:      node.Name,
+        Address:   node.Parsed.Address,
+        Port:      int32(node.Parsed.Port),
+        Transport: node.Parsed.Transport,
+        Tls:       node.Parsed.Security,
+    }
+}
+
 func NewNodeService() (*NodeService, error) {
     state, err := file.LoadState()
     if err != nil {
@@ -25,93 +37,29 @@ func NewNodeService() (*NodeService, error) {
     return &NodeService{state: state}, nil
 }
 
-func (n *NodeService) storeNode(url string, source *models.Source) error {
-	node_key := links.GenerateID(url)
-	
-	_, found := n.state.Nodes[node_key]
+func (n *NodeService) AddManual(ctx context.Context, message *api.Url) (*api.Node, error) {
+	node_key := links.GenerateID(message.Url)
+
+	_, found := n.state.Manual[node_key]
 	if found {
-		return status.Errorf(codes.AlreadyExists, "node already exist")
+		return nil, status.Errorf(codes.AlreadyExists, "manual node already exist")
 	}
 
-	node, err := links.ParseURLToNode(url, source)
+	node, err := links.ParseURLToNode(message.Url)
 	if err != nil {
-		return status.Error(codes.InvalidArgument, err.Error())
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	n.state.Nodes[node_key] = node
-
-	return nil
-}
-
-func (n *NodeService) GetNodes(ctx context.Context, message *api.Null) (*api.Nodes, error) {
-	nodes := make([]*api.Node, 0, len(n.state.Nodes))
-
-	for id, node := range n.state.Nodes {
-		nodes = append(nodes, &api.Node{
-			Id: id,
-			Type: node.Parsed.Type,
-			Name: node.Name,
-			Address: node.Parsed.Address,
-			Port: int32(node.Parsed.Port),
-			Transport: node.Parsed.Transport,
-			Tls: node.Parsed.Security,
-			Source: string(node.Source.Type),
-		})
-	}
-
-	return &api.Nodes{
-		Nodes: nodes,
-	}, nil
-}
-
-func (n *NodeService) AddNode(ctx context.Context, message *api.Url) (*api.AddedNodesCount, error) {
-	if err := n.storeNode(message.Url, &models.Source{
-		Type: models.SourceManual,
-	}); err != nil {
-		return nil, err
-	}
+	n.state.Manual[node_key] = node
 
 	if err := file.SaveState(n.state); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &api.AddedNodesCount{
-		Added: 1,
-		Received: 1,
-	}, nil
+	return mapToApiNode(node_key, node), nil
 }
 
-func (n *NodeService) FetchSubscriptionNodes(ctx context.Context, message *api.SubscriptionId) (*api.AddedNodesCount, error) {
-	url := n.state.Subscriptions[message.Id].URL
-	node_links, err := links.FetchVLESSLinks(url)
-
-	var (
-		added = 0
-		recieved = len(node_links)
-	)
-
-	for _, link := range node_links{
-		if err := n.storeNode(link, &models.Source{
-			Type: models.SourceSubscription,
-			SubscriptionID: message.Id,
-		}); err != nil {
-			continue
-		}
-
-		added++
-	}
-
-	if err = file.SaveState(n.state); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return &api.AddedNodesCount{
-		Added: int64(added),
-		Received: int64(recieved),
-	}, nil
-}
-
-func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*api.SubscriptionId, error) {
+func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*api.Subscription, error) {
 	sub_key := links.GenerateID(message.Url)
 
 	_, found := n.state.Subscriptions[sub_key]
@@ -124,12 +72,38 @@ func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*a
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	node_links, err := links.FetchVLESSLinks(message.Url)
+	if err != nil {
+		return nil, status.Errorf(codes.Canceled, "error getting subscribtion")
+	}
+
 	n.state.Subscriptions[sub_key] = &models.Subscription{
 		Name: name.Host,
 		URL: message.Url,
+		Nodes: make(map[string]models.Node, len(node_links)),
 	}
 
-	return &api.SubscriptionId{
+	var nodes = make([]*api.Node, 0, len(node_links))
+
+	for id, link := range node_links{
+		node_key := links.GenerateID(link)
+
+		node, err := links.ParseURLToNode(link)
+		if err != nil {
+			return nil, status.Error(codes.Canceled, err.Error())
+		}
+
+		n.state.Subscriptions[sub_key].Nodes[node_key] = *node
+		nodes[id] = mapToApiNode(node_key, node)
+	}
+
+	if err := file.SaveState(n.state); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &api.Subscription{
 		Id: sub_key,
+		Name: name.Host,
+		Nodes: nodes,
 	}, nil
 }
