@@ -2,7 +2,7 @@ from PyQt6.QtCore import QThread, pyqtSignal
 from generated import proxy_pb2_grpc
 import grpc
 
-channel = grpc.insecure_channel('localhost:50051')
+channel = grpc.insecure_channel('localhost:3333')
 stub = proxy_pb2_grpc.NodeServiceStub(channel)
 
 class GrpcWorker(QThread):
