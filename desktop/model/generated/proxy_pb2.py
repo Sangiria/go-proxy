@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0bproxy.proto\x12\x07goproxy\"S\n\x05State\x12\x1d\n\x06manual\x18\x01 \x03(\x0b\x32\r.goproxy.Node\x12+\n\x0csubscription\x18\x02 \x03(\x0b\x32\x15.goproxy.Subscription\"m\n\x04Node\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x04 \x01(\t\x12\x0c\n\x04port\x18\x05 \x01(\x05\x12\x11\n\ttransport\x18\x06 \x01(\t\x12\x0b\n\x03tls\x18\x07 \x01(\t\"F\n\x0cSubscription\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x1c\n\x05nodes\x18\x03 \x03(\x0b\x32\r.goproxy.Node\"\x12\n\x03Url\x12\x0b\n\x03url\x18\x01 \x01(\t\"\x06\n\x04Null2\x9e\x01\n\x0bNodeService\x12(\n\tAddManual\x12\x0c.goproxy.Url\x1a\r.goproxy.Node\x12\x36\n\x0f\x41\x64\x64Subscription\x12\x0c.goproxy.Url\x1a\x15.goproxy.Subscription\x12-\n\x0cGetFullState\x12\r.goproxy.Null\x1a\x0e.goproxy.Stateb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0bproxy.proto\x12\x07goproxy\"S\n\x05State\x12\x1d\n\x06manual\x18\x01 \x03(\x0b\x32\r.goproxy.Node\x12+\n\x0csubscription\x18\x02 \x03(\x0b\x32\x15.goproxy.Subscription\"m\n\x04Node\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x04 \x01(\t\x12\x0c\n\x04port\x18\x05 \x01(\x05\x12\x11\n\ttransport\x18\x06 \x01(\t\x12\x0b\n\x03tls\x18\x07 \x01(\t\"F\n\x0cSubscription\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x1c\n\x05nodes\x18\x03 \x03(\x0b\x32\r.goproxy.Node\"\x12\n\x03Url\x12\x0b\n\x03url\x18\x01 \x01(\t\"\xc6\x01\n\x08NodeForm\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\x12\x0c\n\x04port\x18\x04 \x01(\x05\x12\x0c\n\x04uuid\x18\x05 \x01(\t\x12\x11\n\ttransport\x18\x06 \x01(\t\x12\x10\n\x08security\x18\x07 \x01(\t\x12\x0b\n\x03sni\x18\x08 \x01(\t\x12\n\n\x02\x66p\x18\t \x01(\t\x12\x0b\n\x03pbk\x18\n \x01(\t\x12\x0b\n\x03sid\x18\x0b \x01(\t\x12\x0c\n\x04mode\x18\x0c \x01(\t\x12\r\n\x05\x65xtra\x18\r \x01(\t\"9\n\x10SubscriptionForm\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0b\n\x03url\x18\x03 \x01(\t\"\x06\n\x04Null2\x88\x02\n\x0bNodeService\x12&\n\x07\x41\x64\x64Node\x12\x0c.goproxy.Url\x1a\r.goproxy.Node\x12\x36\n\x0f\x41\x64\x64Subscription\x12\x0c.goproxy.Url\x1a\x15.goproxy.Subscription\x12,\n\x08\x45\x64itNode\x12\x11.goproxy.NodeForm\x1a\r.goproxy.Null\x12<\n\x10\x45\x64itSubscription\x12\x19.goproxy.SubscriptionForm\x1a\r.goproxy.Null\x12-\n\x0cGetFullState\x12\r.goproxy.Null\x1a\x0e.goproxy.Stateb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -39,8 +39,12 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_SUBSCRIPTION']._serialized_end=290
   _globals['_URL']._serialized_start=292
   _globals['_URL']._serialized_end=310
-  _globals['_NULL']._serialized_start=312
-  _globals['_NULL']._serialized_end=318
-  _globals['_NODESERVICE']._serialized_start=321
-  _globals['_NODESERVICE']._serialized_end=479
+  _globals['_NODEFORM']._serialized_start=313
+  _globals['_NODEFORM']._serialized_end=511
+  _globals['_SUBSCRIPTIONFORM']._serialized_start=513
+  _globals['_SUBSCRIPTIONFORM']._serialized_end=570
+  _globals['_NULL']._serialized_start=572
+  _globals['_NULL']._serialized_end=578
+  _globals['_NODESERVICE']._serialized_start=581
+  _globals['_NODESERVICE']._serialized_end=845
 # @@protoc_insertion_point(module_scope)

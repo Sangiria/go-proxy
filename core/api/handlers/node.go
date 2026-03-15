@@ -72,7 +72,7 @@ func (n *NodeService) GetFullState(ctx context.Context, message *api.Null) (*api
 	}, nil
 }
 
-func (n *NodeService) AddManual(ctx context.Context, message *api.Url) (*api.Node, error) {
+func (n *NodeService) AddNode(ctx context.Context, message *api.Url) (*api.Node, error) {
 	node_key := links.GenerateID(message.Url)
 
 	_, found := n.state.Manual[node_key]

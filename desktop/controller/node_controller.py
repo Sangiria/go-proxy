@@ -28,8 +28,6 @@ class GetStateController(NodeController):
             }
             self.view.add_sub(s)
 
-        print("state has been loaded")
-
 class AddController(NodeController):
     def __init__(self, view):
         super().__init__(view)
@@ -52,7 +50,7 @@ class AddController(NodeController):
             if url.startswith(("http", "https")):
                 self.worker = GrpcWorker(stub.AddSubscription, proxy_pb2.Url(url=url))
             else:
-                self.worker = GrpcWorker(stub.AddManual, proxy_pb2.Url(url=url))
+                self.worker = GrpcWorker(stub.AddNode, proxy_pb2.Url(url=url))
 
             self.worker.success.connect(self.add_success) 
             self.worker.error.connect(self.add_error)

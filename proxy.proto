@@ -27,10 +27,34 @@ message Url {
   string url = 1;
 }
 
+message NodeForm {
+  string id = 1;
+  string name = 2;
+  string address = 3;
+  int32 port = 4;
+  string uuid = 5;
+  string transport = 6;
+  string security = 7;
+  string sni = 8;
+  string fp = 9;
+  string pbk = 10;
+  string sid = 11;
+  string mode = 12;
+  string extra = 13;
+}
+
+message SubscriptionForm {
+  string id = 1;
+  string name = 2;
+  string url = 3;
+}
+
 message Null {}
 
 service NodeService {
-  rpc AddManual (Url) returns (Node);
+  rpc AddNode (Url) returns (Node);
   rpc AddSubscription (Url) returns (Subscription);
+  rpc EditNode (NodeForm) returns (Null);
+  rpc EditSubscription (SubscriptionForm) returns (Null);
   rpc GetFullState (Null) returns (State);
 }

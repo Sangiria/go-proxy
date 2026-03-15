@@ -48,6 +48,46 @@ class Url(_message.Message):
     url: str
     def __init__(self, url: _Optional[str] = ...) -> None: ...
 
+class NodeForm(_message.Message):
+    __slots__ = ("id", "name", "address", "port", "uuid", "transport", "security", "sni", "fp", "pbk", "sid", "mode", "extra")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    ADDRESS_FIELD_NUMBER: _ClassVar[int]
+    PORT_FIELD_NUMBER: _ClassVar[int]
+    UUID_FIELD_NUMBER: _ClassVar[int]
+    TRANSPORT_FIELD_NUMBER: _ClassVar[int]
+    SECURITY_FIELD_NUMBER: _ClassVar[int]
+    SNI_FIELD_NUMBER: _ClassVar[int]
+    FP_FIELD_NUMBER: _ClassVar[int]
+    PBK_FIELD_NUMBER: _ClassVar[int]
+    SID_FIELD_NUMBER: _ClassVar[int]
+    MODE_FIELD_NUMBER: _ClassVar[int]
+    EXTRA_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    name: str
+    address: str
+    port: int
+    uuid: str
+    transport: str
+    security: str
+    sni: str
+    fp: str
+    pbk: str
+    sid: str
+    mode: str
+    extra: str
+    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., address: _Optional[str] = ..., port: _Optional[int] = ..., uuid: _Optional[str] = ..., transport: _Optional[str] = ..., security: _Optional[str] = ..., sni: _Optional[str] = ..., fp: _Optional[str] = ..., pbk: _Optional[str] = ..., sid: _Optional[str] = ..., mode: _Optional[str] = ..., extra: _Optional[str] = ...) -> None: ...
+
+class SubscriptionForm(_message.Message):
+    __slots__ = ("id", "name", "url")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    URL_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    name: str
+    url: str
+    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., url: _Optional[str] = ...) -> None: ...
+
 class Null(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...

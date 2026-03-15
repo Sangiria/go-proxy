@@ -19,17 +19,21 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	NodeService_AddManual_FullMethodName       = "/goproxy.NodeService/AddManual"
-	NodeService_AddSubscription_FullMethodName = "/goproxy.NodeService/AddSubscription"
-	NodeService_GetFullState_FullMethodName    = "/goproxy.NodeService/GetFullState"
+	NodeService_AddNode_FullMethodName          = "/goproxy.NodeService/AddNode"
+	NodeService_AddSubscription_FullMethodName  = "/goproxy.NodeService/AddSubscription"
+	NodeService_EditNode_FullMethodName         = "/goproxy.NodeService/EditNode"
+	NodeService_EditSubscription_FullMethodName = "/goproxy.NodeService/EditSubscription"
+	NodeService_GetFullState_FullMethodName     = "/goproxy.NodeService/GetFullState"
 )
 
 // NodeServiceClient is the client API for NodeService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NodeServiceClient interface {
-	AddManual(ctx context.Context, in *Url, opts ...grpc.CallOption) (*Node, error)
+	AddNode(ctx context.Context, in *Url, opts ...grpc.CallOption) (*Node, error)
 	AddSubscription(ctx context.Context, in *Url, opts ...grpc.CallOption) (*Subscription, error)
+	EditNode(ctx context.Context, in *NodeForm, opts ...grpc.CallOption) (*Null, error)
+	EditSubscription(ctx context.Context, in *SubscriptionForm, opts ...grpc.CallOption) (*Null, error)
 	GetFullState(ctx context.Context, in *Null, opts ...grpc.CallOption) (*State, error)
 }
 
@@ -41,10 +45,10 @@ func NewNodeServiceClient(cc grpc.ClientConnInterface) NodeServiceClient {
 	return &nodeServiceClient{cc}
 }
 
-func (c *nodeServiceClient) AddManual(ctx context.Context, in *Url, opts ...grpc.CallOption) (*Node, error) {
+func (c *nodeServiceClient) AddNode(ctx context.Context, in *Url, opts ...grpc.CallOption) (*Node, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Node)
-	err := c.cc.Invoke(ctx, NodeService_AddManual_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, NodeService_AddNode_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -55,6 +59,26 @@ func (c *nodeServiceClient) AddSubscription(ctx context.Context, in *Url, opts .
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Subscription)
 	err := c.cc.Invoke(ctx, NodeService_AddSubscription_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *nodeServiceClient) EditNode(ctx context.Context, in *NodeForm, opts ...grpc.CallOption) (*Null, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Null)
+	err := c.cc.Invoke(ctx, NodeService_EditNode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *nodeServiceClient) EditSubscription(ctx context.Context, in *SubscriptionForm, opts ...grpc.CallOption) (*Null, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Null)
+	err := c.cc.Invoke(ctx, NodeService_EditSubscription_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,8 +99,10 @@ func (c *nodeServiceClient) GetFullState(ctx context.Context, in *Null, opts ...
 // All implementations must embed UnimplementedNodeServiceServer
 // for forward compatibility
 type NodeServiceServer interface {
-	AddManual(context.Context, *Url) (*Node, error)
+	AddNode(context.Context, *Url) (*Node, error)
 	AddSubscription(context.Context, *Url) (*Subscription, error)
+	EditNode(context.Context, *NodeForm) (*Null, error)
+	EditSubscription(context.Context, *SubscriptionForm) (*Null, error)
 	GetFullState(context.Context, *Null) (*State, error)
 	mustEmbedUnimplementedNodeServiceServer()
 }
@@ -85,11 +111,17 @@ type NodeServiceServer interface {
 type UnimplementedNodeServiceServer struct {
 }
 
-func (UnimplementedNodeServiceServer) AddManual(context.Context, *Url) (*Node, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddManual not implemented")
+func (UnimplementedNodeServiceServer) AddNode(context.Context, *Url) (*Node, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddNode not implemented")
 }
 func (UnimplementedNodeServiceServer) AddSubscription(context.Context, *Url) (*Subscription, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddSubscription not implemented")
+}
+func (UnimplementedNodeServiceServer) EditNode(context.Context, *NodeForm) (*Null, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EditNode not implemented")
+}
+func (UnimplementedNodeServiceServer) EditSubscription(context.Context, *SubscriptionForm) (*Null, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EditSubscription not implemented")
 }
 func (UnimplementedNodeServiceServer) GetFullState(context.Context, *Null) (*State, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFullState not implemented")
@@ -107,20 +139,20 @@ func RegisterNodeServiceServer(s grpc.ServiceRegistrar, srv NodeServiceServer) {
 	s.RegisterService(&NodeService_ServiceDesc, srv)
 }
 
-func _NodeService_AddManual_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _NodeService_AddNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Url)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NodeServiceServer).AddManual(ctx, in)
+		return srv.(NodeServiceServer).AddNode(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: NodeService_AddManual_FullMethodName,
+		FullMethod: NodeService_AddNode_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NodeServiceServer).AddManual(ctx, req.(*Url))
+		return srv.(NodeServiceServer).AddNode(ctx, req.(*Url))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -139,6 +171,42 @@ func _NodeService_AddSubscription_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(NodeServiceServer).AddSubscription(ctx, req.(*Url))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NodeService_EditNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NodeForm)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServiceServer).EditNode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NodeService_EditNode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServiceServer).EditNode(ctx, req.(*NodeForm))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NodeService_EditSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SubscriptionForm)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServiceServer).EditSubscription(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NodeService_EditSubscription_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServiceServer).EditSubscription(ctx, req.(*SubscriptionForm))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -169,12 +237,20 @@ var NodeService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*NodeServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "AddManual",
-			Handler:    _NodeService_AddManual_Handler,
+			MethodName: "AddNode",
+			Handler:    _NodeService_AddNode_Handler,
 		},
 		{
 			MethodName: "AddSubscription",
 			Handler:    _NodeService_AddSubscription_Handler,
+		},
+		{
+			MethodName: "EditNode",
+			Handler:    _NodeService_EditNode_Handler,
+		},
+		{
+			MethodName: "EditSubscription",
+			Handler:    _NodeService_EditSubscription_Handler,
 		},
 		{
 			MethodName: "GetFullState",
