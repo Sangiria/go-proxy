@@ -2,6 +2,11 @@ syntax = "proto3";
 
 package goproxy;
 
+message State {
+  repeated Node manual = 1;
+  repeated Subscription subscription = 2;
+}
+
 message Node {
   string id = 1;
   string type = 2;
@@ -22,8 +27,10 @@ message Url {
   string url = 1;
 }
 
+message Null {}
+
 service NodeService {
   rpc AddManual (Url) returns (Node);
   rpc AddSubscription (Url) returns (Subscription);
-  //rpc GetFullState
+  rpc GetFullState (Null) returns (State);
 }

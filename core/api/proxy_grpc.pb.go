@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion8
 const (
 	NodeService_AddManual_FullMethodName       = "/goproxy.NodeService/AddManual"
 	NodeService_AddSubscription_FullMethodName = "/goproxy.NodeService/AddSubscription"
+	NodeService_GetFullState_FullMethodName    = "/goproxy.NodeService/GetFullState"
 )
 
 // NodeServiceClient is the client API for NodeService service.
@@ -29,6 +30,7 @@ const (
 type NodeServiceClient interface {
 	AddManual(ctx context.Context, in *Url, opts ...grpc.CallOption) (*Node, error)
 	AddSubscription(ctx context.Context, in *Url, opts ...grpc.CallOption) (*Subscription, error)
+	GetFullState(ctx context.Context, in *Null, opts ...grpc.CallOption) (*State, error)
 }
 
 type nodeServiceClient struct {
@@ -59,12 +61,23 @@ func (c *nodeServiceClient) AddSubscription(ctx context.Context, in *Url, opts .
 	return out, nil
 }
 
+func (c *nodeServiceClient) GetFullState(ctx context.Context, in *Null, opts ...grpc.CallOption) (*State, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(State)
+	err := c.cc.Invoke(ctx, NodeService_GetFullState_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NodeServiceServer is the server API for NodeService service.
 // All implementations must embed UnimplementedNodeServiceServer
 // for forward compatibility
 type NodeServiceServer interface {
 	AddManual(context.Context, *Url) (*Node, error)
 	AddSubscription(context.Context, *Url) (*Subscription, error)
+	GetFullState(context.Context, *Null) (*State, error)
 	mustEmbedUnimplementedNodeServiceServer()
 }
 
@@ -77,6 +90,9 @@ func (UnimplementedNodeServiceServer) AddManual(context.Context, *Url) (*Node, e
 }
 func (UnimplementedNodeServiceServer) AddSubscription(context.Context, *Url) (*Subscription, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddSubscription not implemented")
+}
+func (UnimplementedNodeServiceServer) GetFullState(context.Context, *Null) (*State, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFullState not implemented")
 }
 func (UnimplementedNodeServiceServer) mustEmbedUnimplementedNodeServiceServer() {}
 
@@ -127,6 +143,24 @@ func _NodeService_AddSubscription_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NodeService_GetFullState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Null)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServiceServer).GetFullState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NodeService_GetFullState_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServiceServer).GetFullState(ctx, req.(*Null))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NodeService_ServiceDesc is the grpc.ServiceDesc for NodeService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -141,6 +175,10 @@ var NodeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddSubscription",
 			Handler:    _NodeService_AddSubscription_Handler,
+		},
+		{
+			MethodName: "GetFullState",
+			Handler:    _NodeService_GetFullState_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

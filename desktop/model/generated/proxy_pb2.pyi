@@ -6,6 +6,14 @@ from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
+class State(_message.Message):
+    __slots__ = ("manual", "subscription")
+    MANUAL_FIELD_NUMBER: _ClassVar[int]
+    SUBSCRIPTION_FIELD_NUMBER: _ClassVar[int]
+    manual: _containers.RepeatedCompositeFieldContainer[Node]
+    subscription: _containers.RepeatedCompositeFieldContainer[Subscription]
+    def __init__(self, manual: _Optional[_Iterable[_Union[Node, _Mapping]]] = ..., subscription: _Optional[_Iterable[_Union[Subscription, _Mapping]]] = ...) -> None: ...
+
 class Node(_message.Message):
     __slots__ = ("id", "type", "name", "address", "port", "transport", "tls")
     ID_FIELD_NUMBER: _ClassVar[int]
@@ -39,3 +47,7 @@ class Url(_message.Message):
     URL_FIELD_NUMBER: _ClassVar[int]
     url: str
     def __init__(self, url: _Optional[str] = ...) -> None: ...
+
+class Null(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...

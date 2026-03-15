@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import QDialog, QMainWindow, QTreeWidgetItem
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from design.mainwindow import Ui_MainWindow
 from design.addsubscriptiondialog import Ui_Dialog
-from controller.node_controller import AddRequestController
+from controller.node_controller import AddController, GetStateController, NodeController
 
 class AddDialog(QDialog, Ui_Dialog):
     def __init__(self, parent=None):
@@ -15,8 +15,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-        self.add_controller = AddRequestController(self)
-        self.btnAddSubscription.clicked.connect(self.add_controller.handle_add)
+        self.node_controller = AddController(self)
+        self.state_controller = GetStateController(self)
+
+        self.btnAddSubscription.clicked.connect(self.node_controller.handle_add)
+        QTimer.singleShot(0, self.state_controller.handle_get_state)
     def add_node(self, item):
         row_data = [
             str(item.name),

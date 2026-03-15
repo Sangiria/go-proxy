@@ -24,19 +24,23 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0bproxy.proto\x12\x07goproxy\"m\n\x04Node\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x04 \x01(\t\x12\x0c\n\x04port\x18\x05 \x01(\x05\x12\x11\n\ttransport\x18\x06 \x01(\t\x12\x0b\n\x03tls\x18\x07 \x01(\t\"F\n\x0cSubscription\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x1c\n\x05nodes\x18\x03 \x03(\x0b\x32\r.goproxy.Node\"\x12\n\x03Url\x12\x0b\n\x03url\x18\x01 \x01(\t2o\n\x0bNodeService\x12(\n\tAddManual\x12\x0c.goproxy.Url\x1a\r.goproxy.Node\x12\x36\n\x0f\x41\x64\x64Subscription\x12\x0c.goproxy.Url\x1a\x15.goproxy.Subscriptionb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0bproxy.proto\x12\x07goproxy\"S\n\x05State\x12\x1d\n\x06manual\x18\x01 \x03(\x0b\x32\r.goproxy.Node\x12+\n\x0csubscription\x18\x02 \x03(\x0b\x32\x15.goproxy.Subscription\"m\n\x04Node\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x04 \x01(\t\x12\x0c\n\x04port\x18\x05 \x01(\x05\x12\x11\n\ttransport\x18\x06 \x01(\t\x12\x0b\n\x03tls\x18\x07 \x01(\t\"F\n\x0cSubscription\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x1c\n\x05nodes\x18\x03 \x03(\x0b\x32\r.goproxy.Node\"\x12\n\x03Url\x12\x0b\n\x03url\x18\x01 \x01(\t\"\x06\n\x04Null2\x9e\x01\n\x0bNodeService\x12(\n\tAddManual\x12\x0c.goproxy.Url\x1a\r.goproxy.Node\x12\x36\n\x0f\x41\x64\x64Subscription\x12\x0c.goproxy.Url\x1a\x15.goproxy.Subscription\x12-\n\x0cGetFullState\x12\r.goproxy.Null\x1a\x0e.goproxy.Stateb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'proxy_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_NODE']._serialized_start=24
-  _globals['_NODE']._serialized_end=133
-  _globals['_SUBSCRIPTION']._serialized_start=135
-  _globals['_SUBSCRIPTION']._serialized_end=205
-  _globals['_URL']._serialized_start=207
-  _globals['_URL']._serialized_end=225
-  _globals['_NODESERVICE']._serialized_start=227
-  _globals['_NODESERVICE']._serialized_end=338
+  _globals['_STATE']._serialized_start=24
+  _globals['_STATE']._serialized_end=107
+  _globals['_NODE']._serialized_start=109
+  _globals['_NODE']._serialized_end=218
+  _globals['_SUBSCRIPTION']._serialized_start=220
+  _globals['_SUBSCRIPTION']._serialized_end=290
+  _globals['_URL']._serialized_start=292
+  _globals['_URL']._serialized_end=310
+  _globals['_NULL']._serialized_start=312
+  _globals['_NULL']._serialized_end=318
+  _globals['_NODESERVICE']._serialized_start=321
+  _globals['_NODESERVICE']._serialized_end=479
 # @@protoc_insertion_point(module_scope)

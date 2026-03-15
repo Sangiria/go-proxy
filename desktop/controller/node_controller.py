@@ -2,22 +2,51 @@ from model.worker import GrpcWorker, stub
 from model.generated import proxy_pb2
 import grpc
 
-class AddRequestController:
+manual, subs = dict(), dict()
+
+class NodeController:
     def __init__(self, view):
         self.view = view
+        self.worker = None
+
+class GetStateController(NodeController):
+    def __init__(self, view):
+        super().__init__(view)
+    def handle_get_state(self):
+        self.worker = GrpcWorker(stub.GetFullState, proxy_pb2.Null())
+        self.worker.success.connect(self.get_state_success) 
+        self.worker.start()
+    def get_state_success(self, response):
+        for m in response.manual:
+            manual[m.id] = m.name
+            self.view.add_node(m)
+
+        for s in response.subscription:
+            subs[s.id] = {
+                "name": s.name,
+                "nodes": {n.id: n.name for n in s.nodes}
+            }
+            self.view.add_sub(s)
+
+        print("state has been loaded")
+
+class AddController(NodeController):
+    def __init__(self, view):
+        super().__init__(view)
         self.dialog = None
-        self.manual, self.subs = dict(), dict()
     def handle_add(self):
         from view.window import AddDialog
         self.dialog = AddDialog(self.view)
 
         def process_add():
-            self.dialog.labelError.setStyleSheet("color: black;")
-            self.dialog.labelError.setText("adding...")
             url = self.dialog.lineEdit.text().strip()
             if not url:
+                self.dialog.labelError.setStyleSheet("color: red;")
                 self.dialog.labelError.setText("field cannot be empty")
                 return
+
+            self.dialog.labelError.setStyleSheet("color: black;")
+            self.dialog.labelError.setText("adding...")
 
             self.dialog.setEnabled(False)
             if url.startswith(("http", "https")):
@@ -26,7 +55,7 @@ class AddRequestController:
                 self.worker = GrpcWorker(stub.AddManual, proxy_pb2.Url(url=url))
 
             self.worker.success.connect(self.add_success) 
-            self.worker.error.connect(self.add_error) 
+            self.worker.error.connect(self.add_error)
             self.worker.start()
 
         self.dialog.buttonBox.accepted.disconnect()
@@ -35,16 +64,14 @@ class AddRequestController:
     def add_success(self, response):
         self.dialog.accept()
         if isinstance(response, proxy_pb2.Node):
-            self.manual[response.id] = response.name
+            manual[response.id] = response.name
             self.view.add_node(response)
-            print("success adding node")
         elif isinstance(response, proxy_pb2.Subscription):
-            self.subs[response.id] = {
+            subs[response.id] = {
                 "name": response.name,
                 "nodes": {node.id: node.name for node in response.nodes}
             }
             self.view.add_sub(response)
-            print("success adding sub")
     def add_error(self, err):
         self.dialog.setEnabled(True)
         self.dialog.labelError.setStyleSheet("color: red;")

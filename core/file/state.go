@@ -7,9 +7,11 @@ import (
 )
 
 type State struct {
-	ActiveNodeId	string							`json:"active_node"`
-	Subscriptions	map[string]*models.Subscription	`json:"subscriptions"`
-	Manual			map[string]*models.Node			`json:"manual"`
+	ActiveNodeId			string							`json:"active_node"`
+	Subscriptions			map[string]*models.Subscription	`json:"subscriptions"`
+	Manual					map[string]*models.Node			`json:"manual"`
+	ManualOrder				[]string						`json:"manual_order"`
+	SubscriptionOrder		[]string						`json:"subscription_order"`
 }
 
 func SaveState(s *State) error {
@@ -47,6 +49,8 @@ func LoadState() (*State, error) {
 			ActiveNodeId: "",
 			Subscriptions: make(map[string]*models.Subscription),
 			Manual: make(map[string]*models.Node),
+			ManualOrder: make([]string, 0),
+			SubscriptionOrder: make([]string, 0),
 		}
 
 		data, _ := json.MarshalIndent(new_state, "", "\t")

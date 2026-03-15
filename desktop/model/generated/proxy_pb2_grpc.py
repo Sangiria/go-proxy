@@ -44,6 +44,11 @@ class NodeServiceStub(object):
                 request_serializer=proxy__pb2.Url.SerializeToString,
                 response_deserializer=proxy__pb2.Subscription.FromString,
                 _registered_method=True)
+        self.GetFullState = channel.unary_unary(
+                '/goproxy.NodeService/GetFullState',
+                request_serializer=proxy__pb2.Null.SerializeToString,
+                response_deserializer=proxy__pb2.State.FromString,
+                _registered_method=True)
 
 
 class NodeServiceServicer(object):
@@ -56,8 +61,13 @@ class NodeServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def AddSubscription(self, request, context):
-        """rpc GetFullState
-        """
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetFullState(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -74,6 +84,11 @@ def add_NodeServiceServicer_to_server(servicer, server):
                     servicer.AddSubscription,
                     request_deserializer=proxy__pb2.Url.FromString,
                     response_serializer=proxy__pb2.Subscription.SerializeToString,
+            ),
+            'GetFullState': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetFullState,
+                    request_deserializer=proxy__pb2.Null.FromString,
+                    response_serializer=proxy__pb2.State.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -130,6 +145,33 @@ class NodeService(object):
             '/goproxy.NodeService/AddSubscription',
             proxy__pb2.Url.SerializeToString,
             proxy__pb2.Subscription.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetFullState(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/goproxy.NodeService/GetFullState',
+            proxy__pb2.Null.SerializeToString,
+            proxy__pb2.State.FromString,
             options,
             channel_credentials,
             insecure,
