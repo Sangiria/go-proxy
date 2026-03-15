@@ -42,7 +42,7 @@ func (n *NodeService) AddManual(ctx context.Context, message *api.Url) (*api.Nod
 
 	_, found := n.state.Manual[node_key]
 	if found {
-		return nil, status.Errorf(codes.AlreadyExists, "manual node already exist")
+		return nil, status.Errorf(codes.AlreadyExists, "manual node already exists")
 	}
 
 	node, err := links.ParseURLToNode(message.Url)
@@ -83,7 +83,7 @@ func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*a
 		Nodes: make(map[string]models.Node, len(node_links)),
 	}
 
-	var nodes = make([]*api.Node, 0, len(node_links))
+	var nodes = make([]*api.Node, len(node_links))
 
 	for id, link := range node_links{
 		node_key := links.GenerateID(link)
