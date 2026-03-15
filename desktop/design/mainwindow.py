@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.9.2
+## Created by: Qt User Interface Compiler version 6.10.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -102,12 +102,10 @@ class Ui_MainWindow(object):
         self.btnAddSubscription.setText(QCoreApplication.translate("MainWindow", u"Add", None))
         self.btnUpdate.setText(QCoreApplication.translate("MainWindow", u"Update", None))
         ___qtreewidgetitem = self.treeWidget.headerItem()
-        ___qtreewidgetitem.setText(7, QCoreApplication.translate("MainWindow", u"Speed", None));
-        ___qtreewidgetitem.setText(6, QCoreApplication.translate("MainWindow", u"TLS", None));
-        ___qtreewidgetitem.setText(5, QCoreApplication.translate("MainWindow", u"Port", None));
-        ___qtreewidgetitem.setText(4, QCoreApplication.translate("MainWindow", u"Transport", None));
-        ___qtreewidgetitem.setText(3, QCoreApplication.translate("MainWindow", u"Address", None));
-        ___qtreewidgetitem.setText(2, QCoreApplication.translate("MainWindow", u"Protocol", None));
+        ___qtreewidgetitem.setText(5, QCoreApplication.translate("MainWindow", u"TLS", None));
+        ___qtreewidgetitem.setText(4, QCoreApplication.translate("MainWindow", u"Port", None));
+        ___qtreewidgetitem.setText(3, QCoreApplication.translate("MainWindow", u"Transport", None));
+        ___qtreewidgetitem.setText(2, QCoreApplication.translate("MainWindow", u"Address", None));
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("MainWindow", u"Type", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("MainWindow", u"Name", None));
         self.btnStart.setText("")

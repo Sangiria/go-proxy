@@ -1,7 +1,7 @@
 import sys
 from PyQt6.QtWidgets import QApplication
-from logic.window import MainWindow
-from service.worker import channel
+from view.window import MainWindow
+from model.worker import channel
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

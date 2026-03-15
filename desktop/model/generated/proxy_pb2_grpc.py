@@ -34,51 +34,30 @@ class NodeServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.AddNode = channel.unary_unary(
-                '/goproxy.NodeService/AddNode',
+        self.AddManual = channel.unary_unary(
+                '/goproxy.NodeService/AddManual',
                 request_serializer=proxy__pb2.Url.SerializeToString,
-                response_deserializer=proxy__pb2.AddedNodesCount.FromString,
+                response_deserializer=proxy__pb2.Node.FromString,
                 _registered_method=True)
         self.AddSubscription = channel.unary_unary(
                 '/goproxy.NodeService/AddSubscription',
                 request_serializer=proxy__pb2.Url.SerializeToString,
-                response_deserializer=proxy__pb2.SubscriptionId.FromString,
-                _registered_method=True)
-        self.FetchSubscriptionNodes = channel.unary_unary(
-                '/goproxy.NodeService/FetchSubscriptionNodes',
-                request_serializer=proxy__pb2.SubscriptionId.SerializeToString,
-                response_deserializer=proxy__pb2.AddedNodesCount.FromString,
-                _registered_method=True)
-        self.GetNodes = channel.unary_unary(
-                '/goproxy.NodeService/GetNodes',
-                request_serializer=proxy__pb2.Null.SerializeToString,
-                response_deserializer=proxy__pb2.Nodes.FromString,
+                response_deserializer=proxy__pb2.Subscription.FromString,
                 _registered_method=True)
 
 
 class NodeServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def AddNode(self, request, context):
+    def AddManual(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def AddSubscription(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def FetchSubscriptionNodes(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def GetNodes(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """rpc GetFullState
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -86,25 +65,15 @@ class NodeServiceServicer(object):
 
 def add_NodeServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'AddNode': grpc.unary_unary_rpc_method_handler(
-                    servicer.AddNode,
+            'AddManual': grpc.unary_unary_rpc_method_handler(
+                    servicer.AddManual,
                     request_deserializer=proxy__pb2.Url.FromString,
-                    response_serializer=proxy__pb2.AddedNodesCount.SerializeToString,
+                    response_serializer=proxy__pb2.Node.SerializeToString,
             ),
             'AddSubscription': grpc.unary_unary_rpc_method_handler(
                     servicer.AddSubscription,
                     request_deserializer=proxy__pb2.Url.FromString,
-                    response_serializer=proxy__pb2.SubscriptionId.SerializeToString,
-            ),
-            'FetchSubscriptionNodes': grpc.unary_unary_rpc_method_handler(
-                    servicer.FetchSubscriptionNodes,
-                    request_deserializer=proxy__pb2.SubscriptionId.FromString,
-                    response_serializer=proxy__pb2.AddedNodesCount.SerializeToString,
-            ),
-            'GetNodes': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetNodes,
-                    request_deserializer=proxy__pb2.Null.FromString,
-                    response_serializer=proxy__pb2.Nodes.SerializeToString,
+                    response_serializer=proxy__pb2.Subscription.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -118,7 +87,7 @@ class NodeService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def AddNode(request,
+    def AddManual(request,
             target,
             options=(),
             channel_credentials=None,
@@ -131,9 +100,9 @@ class NodeService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/goproxy.NodeService/AddNode',
+            '/goproxy.NodeService/AddManual',
             proxy__pb2.Url.SerializeToString,
-            proxy__pb2.AddedNodesCount.FromString,
+            proxy__pb2.Node.FromString,
             options,
             channel_credentials,
             insecure,
@@ -160,61 +129,7 @@ class NodeService(object):
             target,
             '/goproxy.NodeService/AddSubscription',
             proxy__pb2.Url.SerializeToString,
-            proxy__pb2.SubscriptionId.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def FetchSubscriptionNodes(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/goproxy.NodeService/FetchSubscriptionNodes',
-            proxy__pb2.SubscriptionId.SerializeToString,
-            proxy__pb2.AddedNodesCount.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def GetNodes(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/goproxy.NodeService/GetNodes',
-            proxy__pb2.Null.SerializeToString,
-            proxy__pb2.Nodes.FromString,
+            proxy__pb2.Subscription.FromString,
             options,
             channel_credentials,
             insecure,
