@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>UI_TITLE_123</string>
+   <string>Go-proxy</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -106,7 +106,7 @@
        <item>
         <widget class="QToolButton" name="btnStart">
          <property name="text">
-          <string/>
+          <string>▷</string>
          </property>
         </widget>
        </item>

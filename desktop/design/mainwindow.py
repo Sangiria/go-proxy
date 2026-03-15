@@ -98,7 +98,7 @@ class Ui_MainWindow(object):
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"UI_TITLE_123", None))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Go-proxy", None))
         self.btnAddSubscription.setText(QCoreApplication.translate("MainWindow", u"Add", None))
         self.btnUpdate.setText(QCoreApplication.translate("MainWindow", u"Update", None))
         ___qtreewidgetitem = self.treeWidget.headerItem()
@@ -108,7 +108,7 @@ class Ui_MainWindow(object):
         ___qtreewidgetitem.setText(2, QCoreApplication.translate("MainWindow", u"Address", None));
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("MainWindow", u"Type", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("MainWindow", u"Name", None));
-        self.btnStart.setText("")
+        self.btnStart.setText(QCoreApplication.translate("MainWindow", u"\u25b7", None))
         self.rdbtnTun.setText(QCoreApplication.translate("MainWindow", u"TUN", None))
         self.rdbtnSysProxy.setText(QCoreApplication.translate("MainWindow", u"System Proxy", None))
     # retranslateUi
