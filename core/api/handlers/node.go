@@ -11,6 +11,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 )
 
 type NodeService struct {
@@ -150,7 +151,9 @@ func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*a
 }
 
 func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api.Null, error) {
-	if message == nil {
+	empty := &api.NodeForm{Id: message.Id}
+	
+	if proto.Equal(message, empty) {
 		return nil, status.Errorf(codes.InvalidArgument, "the form is empty")
 	}
 
@@ -159,7 +162,7 @@ func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api
 			return nil, status.Errorf(codes.NotFound, "node doesn't exist") 
 		}
 
-		if err := service.UpdateFromForm(n.state.Subscriptions[*message.SourceId].Nodes[message.Id], message); err != nil {
+		if err := service.UpdateNodeFromForm(n.state.Subscriptions[*message.SourceId].Nodes[message.Id], message); err != nil {
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
@@ -168,11 +171,31 @@ func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api
 		return nil, status.Errorf(codes.NotFound, "node doesn't exist")
 	}
 
-	err := service.UpdateFromForm(n.state.Manual[message.Id], message)
+	err := service.UpdateNodeFromForm(n.state.Manual[message.Id], message)
 
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
+
+	if err := file.SaveState(n.state); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	
+	return &api.Null{}, nil
+}
+
+func (n *NodeService) EditSubscription(ctx context.Context, message *api.SubscriptionForm) (*api.Null, error) {
+	empty := &api.SubscriptionForm{Id: message.Id}
+
+	if proto.Equal(message, empty) {
+		return nil, status.Errorf(codes.InvalidArgument, "the form is empty")
+	}
+
+	if n.state.Subscriptions[message.Id] == nil {
+		return nil, status.Errorf(codes.NotFound, "subscription doesn't exist")
+	}
+
+	service.UpdateSubscriptionFromForm(n.state.Subscriptions[message.Id], message)
 
 	if err := file.SaveState(n.state); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
