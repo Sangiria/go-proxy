@@ -151,37 +151,36 @@ func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*a
 }
 
 func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api.Null, error) {
-	empty := &api.NodeForm{Id: message.Id}
-	
-	if proto.Equal(message, empty) {
-		return nil, status.Errorf(codes.InvalidArgument, "the form is empty")
-	}
+    empty := &api.NodeForm{Id: message.Id, SourceId: message.SourceId}
+    if proto.Equal(message, empty) {
+        return nil, status.Errorf(codes.InvalidArgument, "the form is empty")
+    }
 
-	if message.SourceId != nil {
-		if n.state.Subscriptions[*message.SourceId].Nodes[message.Id] == nil {
-			return nil, status.Errorf(codes.NotFound, "node doesn't exist") 
-		}
+    var target *models.Node
 
-		if err := service.UpdateNodeFromForm(n.state.Subscriptions[*message.SourceId].Nodes[message.Id], message); err != nil {
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-	}
+    if message.SourceId != nil {
+        sub, ok := n.state.Subscriptions[*message.SourceId]
+        if !ok {
+            return nil, status.Errorf(codes.NotFound, "subscription doesn't exist")
+        }
+        target = sub.Nodes[message.Id]
+    } else {
+        target = n.state.Manual[message.Id]
+    }
 
-	if n.state.Manual[message.Id] == nil {
-		return nil, status.Errorf(codes.NotFound, "node doesn't exist")
-	}
+    if target == nil {
+        return nil, status.Errorf(codes.NotFound, "node doesn't exist")
+    }
 
-	err := service.UpdateNodeFromForm(n.state.Manual[message.Id], message)
+    if err := service.UpdateNodeFromForm(target, message); err != nil {
+        return nil, status.Errorf(codes.InvalidArgument, "update failed: %v", err)
+    }
 
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	if err := file.SaveState(n.state); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	
-	return &api.Null{}, nil
+    if err := file.SaveState(n.state); err != nil {
+        return nil, status.Errorf(codes.Internal, "save error: %v", err)
+    }
+    
+    return &api.Null{}, nil
 }
 
 func (n *NodeService) EditSubscription(ctx context.Context, message *api.SubscriptionForm) (*api.Null, error) {
