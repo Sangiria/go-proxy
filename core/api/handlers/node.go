@@ -25,12 +25,11 @@ func mapToApiNode(id string, node *models.Node) *api.Node {
     }
 }
 
-func mapToApiNodeForm(id string, node *models.Node) *api.NodeForm {
+func mapToApiNodeForm(node *models.Node) *api.NodeForm {
 	port := int32(node.Parsed.Port)
 	extra := string(node.Parsed.XHTTPExtra)
 
 	return &api.NodeForm{
-		Id: id,
 		Name: &node.Name,
 		Address: &node.Parsed.Address,
 		Port: &port,
@@ -97,5 +96,5 @@ func (n *NodeService) GetNode(ctx context.Context, message *api.Id) (*api.NodeFo
 		return nil, status.Errorf(codes.NotFound, "node not found")
 	}
 
-	return mapToApiNodeForm(message.Id, node), nil
+	return mapToApiNodeForm(node), nil
 }
