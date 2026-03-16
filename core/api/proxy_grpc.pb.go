@@ -21,6 +21,8 @@ const _ = grpc.SupportPackageIsVersion8
 const (
 	NodeService_AddNode_FullMethodName          = "/goproxy.NodeService/AddNode"
 	NodeService_AddSubscription_FullMethodName  = "/goproxy.NodeService/AddSubscription"
+	NodeService_GetNode_FullMethodName          = "/goproxy.NodeService/GetNode"
+	NodeService_GetSubscription_FullMethodName  = "/goproxy.NodeService/GetSubscription"
 	NodeService_EditNode_FullMethodName         = "/goproxy.NodeService/EditNode"
 	NodeService_EditSubscription_FullMethodName = "/goproxy.NodeService/EditSubscription"
 	NodeService_GetFullState_FullMethodName     = "/goproxy.NodeService/GetFullState"
@@ -32,6 +34,8 @@ const (
 type NodeServiceClient interface {
 	AddNode(ctx context.Context, in *Url, opts ...grpc.CallOption) (*Node, error)
 	AddSubscription(ctx context.Context, in *Url, opts ...grpc.CallOption) (*Subscription, error)
+	GetNode(ctx context.Context, in *Id, opts ...grpc.CallOption) (*NodeForm, error)
+	GetSubscription(ctx context.Context, in *Id, opts ...grpc.CallOption) (*SubscriptionForm, error)
 	EditNode(ctx context.Context, in *NodeForm, opts ...grpc.CallOption) (*Null, error)
 	EditSubscription(ctx context.Context, in *SubscriptionForm, opts ...grpc.CallOption) (*Null, error)
 	GetFullState(ctx context.Context, in *Null, opts ...grpc.CallOption) (*State, error)
@@ -59,6 +63,26 @@ func (c *nodeServiceClient) AddSubscription(ctx context.Context, in *Url, opts .
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Subscription)
 	err := c.cc.Invoke(ctx, NodeService_AddSubscription_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *nodeServiceClient) GetNode(ctx context.Context, in *Id, opts ...grpc.CallOption) (*NodeForm, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(NodeForm)
+	err := c.cc.Invoke(ctx, NodeService_GetNode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *nodeServiceClient) GetSubscription(ctx context.Context, in *Id, opts ...grpc.CallOption) (*SubscriptionForm, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SubscriptionForm)
+	err := c.cc.Invoke(ctx, NodeService_GetSubscription_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -101,6 +125,8 @@ func (c *nodeServiceClient) GetFullState(ctx context.Context, in *Null, opts ...
 type NodeServiceServer interface {
 	AddNode(context.Context, *Url) (*Node, error)
 	AddSubscription(context.Context, *Url) (*Subscription, error)
+	GetNode(context.Context, *Id) (*NodeForm, error)
+	GetSubscription(context.Context, *Id) (*SubscriptionForm, error)
 	EditNode(context.Context, *NodeForm) (*Null, error)
 	EditSubscription(context.Context, *SubscriptionForm) (*Null, error)
 	GetFullState(context.Context, *Null) (*State, error)
@@ -116,6 +142,12 @@ func (UnimplementedNodeServiceServer) AddNode(context.Context, *Url) (*Node, err
 }
 func (UnimplementedNodeServiceServer) AddSubscription(context.Context, *Url) (*Subscription, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddSubscription not implemented")
+}
+func (UnimplementedNodeServiceServer) GetNode(context.Context, *Id) (*NodeForm, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNode not implemented")
+}
+func (UnimplementedNodeServiceServer) GetSubscription(context.Context, *Id) (*SubscriptionForm, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSubscription not implemented")
 }
 func (UnimplementedNodeServiceServer) EditNode(context.Context, *NodeForm) (*Null, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EditNode not implemented")
@@ -171,6 +203,42 @@ func _NodeService_AddSubscription_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(NodeServiceServer).AddSubscription(ctx, req.(*Url))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NodeService_GetNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Id)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServiceServer).GetNode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NodeService_GetNode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServiceServer).GetNode(ctx, req.(*Id))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NodeService_GetSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Id)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServiceServer).GetSubscription(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NodeService_GetSubscription_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServiceServer).GetSubscription(ctx, req.(*Id))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -243,6 +311,14 @@ var NodeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddSubscription",
 			Handler:    _NodeService_AddSubscription_Handler,
+		},
+		{
+			MethodName: "GetNode",
+			Handler:    _NodeService_GetNode_Handler,
+		},
+		{
+			MethodName: "GetSubscription",
+			Handler:    _NodeService_GetSubscription_Handler,
 		},
 		{
 			MethodName: "EditNode",
