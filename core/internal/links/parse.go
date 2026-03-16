@@ -43,25 +43,25 @@ func ParseNodeURL(u *url.URL) (*models.Parsed, error) {
 
 	uuid_str := strings.TrimSpace(u.User.Username())
 	if uuid_str == "" {
-		return nil, errors.New("uuid required")
-	}
-	if err := uuid.Validate(uuid_str); err != nil {
-		return nil, errors.New("invalid uuid")
-	}
+        return nil, errors.New("uuid required")
+    }
+    if err := uuid.Validate(uuid_str); err != nil {
+        return nil, errors.New("invalid uuid")
+    }
 
-	host, str_port := u.Hostname(), u.Port()
+	host, str_port := strings.TrimSpace(u.Hostname()), u.Port()
 	if host == "" || str_port == "" {
     	return nil, errors.New("missing host or port")
   	}
 
-	port, err := strconv.Atoi(str_port)
-  	if err != nil || port < 1 || port > 65535 {
-		return nil, errors.New("invalid port")
+	port, err := strconv.ParseUint(str_port, 10, 16)
+	if err != nil || uint16(port) == 0 {
+		return nil, errors.New("invalid port (1-65535)")
 	}
 
 	raw_extra := u_q.Get("extra")
 	if raw_extra != "" {
-		extra, err = parseExtra(raw_extra)
+		extra, err = ParseExtra(raw_extra)
 		if err != nil {
 			return nil, err
 		}
@@ -86,7 +86,7 @@ func ParseNodeURL(u *url.URL) (*models.Parsed, error) {
 	}, nil
 }
 
-func parseExtra(r string) (json.RawMessage, error) {
+func ParseExtra(r string) (json.RawMessage, error) {
 	decoded, err := url.QueryUnescape(r)
 	if err != nil {
 		return nil, fmt.Errorf("extra url decode failed: %s", err)
