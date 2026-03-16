@@ -3,8 +3,9 @@ package handlers
 import (
 	"context"
 	"core/api"
-	"core/file"
-	"core/links"
+	"core/internal/file"
+	"core/internal/links"
+	"core/internal/service"
 	"core/models"
 	"net/url"
 
@@ -56,7 +57,7 @@ func (n *NodeService) GetFullState(ctx context.Context, message *api.Null) (*api
 
 		for node_id, node_key := range n.state.Subscriptions[sub_key].NodeOrder {
 			node := n.state.Subscriptions[sub_key].Nodes[node_key]
-			nodes[node_id] = mapToApiNode(node_key, &node)
+			nodes[node_id] = mapToApiNode(node_key, node)
 		}
 
 		sub[sub_id] = &api.Subscription{
@@ -116,7 +117,7 @@ func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*a
 	n.state.Subscriptions[sub_key] = &models.Subscription{
 		Name: name.Host,
 		URL: message.Url,
-		Nodes: make(map[string]models.Node, len(node_links)),
+		Nodes: make(map[string]*models.Node, len(node_links)),
 		NodeOrder: make([]string, 0),
 	}
 	n.state.SubscriptionOrder = append(n.state.SubscriptionOrder, sub_key)
@@ -131,7 +132,7 @@ func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*a
 			return nil, status.Error(codes.Canceled, err.Error())
 		}
 
-		n.state.Subscriptions[sub_key].Nodes[node_key] = *node
+		n.state.Subscriptions[sub_key].Nodes[node_key] = node
 		n.state.Subscriptions[sub_key].NodeOrder = append(n.state.Subscriptions[sub_key].NodeOrder, node_key)
 
 		nodes[id] = mapToApiNode(node_key, node)
@@ -146,4 +147,36 @@ func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*a
 		Name: name.Host,
 		Nodes: nodes,
 	}, nil
+}
+
+func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api.Null, error) {
+	if message == nil {
+		return nil, status.Errorf(codes.InvalidArgument, "the form is empty")
+	}
+
+	if message.SourceId != nil {
+		if n.state.Subscriptions[*message.SourceId].Nodes[message.Id] == nil {
+			return nil, status.Errorf(codes.NotFound, "node doesn't exist") 
+		}
+
+		if err := service.UpdateFromForm(n.state.Subscriptions[*message.SourceId].Nodes[message.Id], message); err != nil {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	}
+
+	if n.state.Manual[message.Id] == nil {
+		return nil, status.Errorf(codes.NotFound, "node doesn't exist")
+	}
+
+	err := service.UpdateFromForm(n.state.Manual[message.Id], message)
+
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if err := file.SaveState(n.state); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	
+	return &api.Null{}, nil
 }
