@@ -7,17 +7,11 @@ import (
 	"core/internal/links"
 	"core/internal/service"
 	"core/models"
-	"net/url"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 )
-
-type NodeService struct {
-	api.UnimplementedNodeServiceServer
-	state *file.State
-}
 
 func mapToApiNode(id string, node *models.Node) *api.Node {
     return &api.Node{
@@ -31,47 +25,25 @@ func mapToApiNode(id string, node *models.Node) *api.Node {
     }
 }
 
-func NewNodeService() (*NodeService, error) {
-    state, err := file.LoadState()
-    if err != nil {
-        return nil, err
-    }
-    return &NodeService{state: state}, nil
-}
+func mapToApiNodeForm(id string, node *models.Node) *api.NodeForm {
+	port := int32(node.Parsed.Port)
+	extra := string(node.Parsed.XHTTPExtra)
 
-func (n *NodeService) GetFullState(ctx context.Context, message *api.Null) (*api.State, error) {
-	if n.state.Manual == nil && n.state.Subscriptions == nil {
-		return &api.State{}, nil
+	return &api.NodeForm{
+		Id: id,
+		Name: &node.Name,
+		Address: &node.Parsed.Address,
+		Port: &port,
+		Uuid: &node.Parsed.UUID,
+		Transport: &node.Parsed.Transport,
+		Security: &node.Parsed.Security,
+		Sni: &node.Parsed.Sni,
+		Fp: &node.Parsed.Fp,
+		Pbk: &node.Parsed.Pbk,
+		Sid: &node.Parsed.Sid,
+		Mode: &node.Parsed.XHTTPMode,
+		Extra: &extra,
 	}
-
-	var (
-		manual = make([]*api.Node, len(n.state.ManualOrder))
-		sub = make([]*api.Subscription, len(n.state.SubscriptionOrder))
-	)
-
-	for node_id, node_key := range n.state.ManualOrder {
-		manual[node_id] = mapToApiNode(node_key, n.state.Manual[node_key])
-	}
-
-	for sub_id, sub_key := range n.state.SubscriptionOrder {
-		var nodes = make([]*api.Node, len(n.state.Subscriptions[sub_key].NodeOrder))
-
-		for node_id, node_key := range n.state.Subscriptions[sub_key].NodeOrder {
-			node := n.state.Subscriptions[sub_key].Nodes[node_key]
-			nodes[node_id] = mapToApiNode(node_key, node)
-		}
-
-		sub[sub_id] = &api.Subscription{
-			Id: sub_key,
-			Name: n.state.Subscriptions[sub_key].Name,
-			Nodes: nodes,
-		}
-	}
-
-	return &api.State{
-		Manual: manual,
-		Subscription: sub,
-	}, nil
 }
 
 func (n *NodeService) AddNode(ctx context.Context, message *api.Url) (*api.Node, error) {
@@ -97,82 +69,18 @@ func (n *NodeService) AddNode(ctx context.Context, message *api.Url) (*api.Node,
 	return mapToApiNode(node_key, node), nil
 }
 
-func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*api.Subscription, error) {
-	sub_key := links.GenerateID(message.Url)
-
-	_, found := n.state.Subscriptions[sub_key]
-	if found {
-		return nil, status.Errorf(codes.AlreadyExists, "subscription already exists")
-	}
-
-	name, err := url.Parse(message.Url)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	node_links, err := links.FetchVLESSLinks(message.Url)
-	if err != nil {
-		return nil, status.Errorf(codes.Canceled, "error getting subscribtion")
-	}
-
-	n.state.Subscriptions[sub_key] = &models.Subscription{
-		Name: name.Host,
-		URL: message.Url,
-		Nodes: make(map[string]*models.Node, len(node_links)),
-		NodeOrder: make([]string, 0),
-	}
-	n.state.SubscriptionOrder = append(n.state.SubscriptionOrder, sub_key)
-
-	var nodes = make([]*api.Node, len(node_links))
-
-	for id, link := range node_links{
-		node_key := links.GenerateID(link)
-
-		node, err := links.ParseURLToNode(link)
-		if err != nil {
-			return nil, status.Error(codes.Canceled, err.Error())
-		}
-
-		n.state.Subscriptions[sub_key].Nodes[node_key] = node
-		n.state.Subscriptions[sub_key].NodeOrder = append(n.state.Subscriptions[sub_key].NodeOrder, node_key)
-
-		nodes[id] = mapToApiNode(node_key, node)
-	}
-
-	if err := file.SaveState(n.state); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return &api.Subscription{
-		Id: sub_key,
-		Name: name.Host,
-		Nodes: nodes,
-	}, nil
-}
-
 func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api.Null, error) {
     empty := &api.NodeForm{Id: message.Id, SourceId: message.SourceId}
     if proto.Equal(message, empty) {
         return nil, status.Errorf(codes.InvalidArgument, "the form is empty")
     }
 
-    var target *models.Node
-
-    if message.SourceId != nil {
-        sub, ok := n.state.Subscriptions[*message.SourceId]
-        if !ok {
-            return nil, status.Errorf(codes.NotFound, "subscription doesn't exist")
-        }
-        target = sub.Nodes[message.Id]
-    } else {
-        target = n.state.Manual[message.Id]
+    node := n.FindNode(&api.Id{Id: message.Id, SourceId: message.SourceId})
+    if node == nil {
+        return nil, status.Errorf(codes.NotFound, "node not found")
     }
 
-    if target == nil {
-        return nil, status.Errorf(codes.NotFound, "node doesn't exist")
-    }
-
-    if err := service.UpdateNodeFromForm(target, message); err != nil {
+    if err := service.UpdateNodeFromForm(node, message); err != nil {
         return nil, status.Errorf(codes.InvalidArgument, "update failed: %v", err)
     }
 
@@ -183,22 +91,11 @@ func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api
     return &api.Null{}, nil
 }
 
-func (n *NodeService) EditSubscription(ctx context.Context, message *api.SubscriptionForm) (*api.Null, error) {
-	empty := &api.SubscriptionForm{Id: message.Id}
-
-	if proto.Equal(message, empty) {
-		return nil, status.Errorf(codes.InvalidArgument, "the form is empty")
+func (n *NodeService) GetNode(ctx context.Context, message *api.Id) (*api.NodeForm, error) {
+	node := n.FindNode(message)
+	if node == nil {
+		return nil, status.Errorf(codes.NotFound, "node not found")
 	}
 
-	if n.state.Subscriptions[message.Id] == nil {
-		return nil, status.Errorf(codes.NotFound, "subscription doesn't exist")
-	}
-
-	service.UpdateSubscriptionFromForm(n.state.Subscriptions[message.Id], message)
-
-	if err := file.SaveState(n.state); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	
-	return &api.Null{}, nil
+	return mapToApiNodeForm(message.Id, node), nil
 }

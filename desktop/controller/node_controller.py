@@ -83,7 +83,7 @@ class AddController(NodeController):
             elif code == grpc.StatusCode.UNAVAILABLE:
                 message = "server is unavailable, please check the connection"
             elif code == grpc.StatusCode.INVALID_ARGUMENT:
-                message = f"invalid url, operation cancelled"
+                message = f"invalid url, {details}"
             elif code == grpc.StatusCode.CANCELLED and self.worker.method == stub.AddSubscription:
                 message = f"failed to get the subscription"
             elif code == grpc.StatusCode.INTERNAL:

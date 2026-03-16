@@ -50,11 +50,18 @@ message SubscriptionForm {
   optional string url = 3;
 }
 
+message Id {
+  string id = 1;
+  optional string source_id = 2;
+}
+
 message Null {}
 
 service NodeService {
   rpc AddNode (Url) returns (Node);
   rpc AddSubscription (Url) returns (Subscription);
+  rpc GetNode (Id) returns (NodeForm);
+  rpc GetSubscription (Id) returns (SubscriptionForm);
   rpc EditNode (NodeForm) returns (Null);
   rpc EditSubscription (SubscriptionForm) returns (Null);
   rpc GetFullState (Null) returns (State);
