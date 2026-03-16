@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func UpdateFromForm(node *models.Node, node_form *api.NodeForm) error {
+func UpdateNodeFromForm(node *models.Node, node_form *api.NodeForm) error {
 	if node_form.Name != nil {
 		node.Name = *node_form.Name
 	}
@@ -69,4 +69,14 @@ func UpdateFromForm(node *models.Node, node_form *api.NodeForm) error {
 	}
 	
 	return nil
+}
+
+func UpdateSubscriptionFromForm(sub *models.Subscription, sub_form *api.SubscriptionForm) {
+	if sub_form.Name != nil {
+		sub.Name = *sub_form.Name
+	}
+
+	if sub_form.Url != nil {
+		sub.URL = *sub_form.Url
+	}
 }
