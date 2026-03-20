@@ -27,16 +27,6 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
     <widget class="QScrollArea" name="scrollArea">
      <property name="widgetResizable">
       <bool>true</bool>
@@ -52,13 +42,18 @@
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="6" column="1">
-        <widget class="QComboBox" name="comboBox_2">
+        <widget class="QComboBox" name="securityCBox">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <item>
+          <property name="text">
+           <string/>
+          </property>
+         </item>
          <item>
           <property name="text">
            <string>reality</string>
@@ -72,37 +67,27 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="address">
          <property name="text">
           <string>Address</string>
          </property>
         </widget>
        </item>
        <item row="10" column="0">
-        <widget class="QLabel" name="label_10">
+        <widget class="QLabel" name="extra">
          <property name="text">
           <string>Extra</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="lineEdit_2"/>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="lineEdit_3">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
+        <widget class="QLineEdit" name="addressEdit"/>
        </item>
        <item row="7" column="1">
-        <widget class="QLineEdit" name="lineEdit_5"/>
+        <widget class="QLineEdit" name="sniEdit"/>
        </item>
        <item row="4" column="1" colspan="2">
-        <widget class="QComboBox" name="comboBox">
+        <widget class="QComboBox" name="transportCBox">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -152,38 +137,38 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="lineEdit"/>
+        <widget class="QLineEdit" name="nameEdit"/>
        </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="transport">
          <property name="text">
           <string>Transport</string>
          </property>
         </widget>
        </item>
        <item row="0" column="0">
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="name">
          <property name="text">
           <string>Name</string>
          </property>
         </widget>
        </item>
        <item row="9" column="0">
-        <widget class="QLabel" name="label_8">
+        <widget class="QLabel" name="pbk">
          <property name="text">
           <string>Public Key</string>
          </property>
         </widget>
        </item>
        <item row="5" column="0">
-        <widget class="QLabel" name="label_9">
+        <widget class="QLabel" name="mode">
          <property name="text">
-          <string>Transport Mode</string>
+          <string>XHTTP Mode</string>
          </property>
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QComboBox" name="comboBox_3">
+        <widget class="QComboBox" name="modeCBox">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -213,51 +198,51 @@
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="port">
          <property name="text">
           <string>Port</string>
          </property>
         </widget>
        </item>
        <item row="6" column="0">
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="security">
          <property name="text">
           <string>Security</string>
          </property>
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="uuid">
          <property name="text">
           <string>UUID</string>
          </property>
         </widget>
        </item>
        <item row="9" column="1">
-        <widget class="QLineEdit" name="lineEdit_6"/>
+        <widget class="QLineEdit" name="pbkEdit"/>
        </item>
        <item row="7" column="0">
-        <widget class="QLabel" name="label_7">
+        <widget class="QLabel" name="sni">
          <property name="text">
           <string>SNI</string>
          </property>
         </widget>
        </item>
        <item row="10" column="1">
-        <widget class="QTextEdit" name="textEdit"/>
+        <widget class="QTextEdit" name="extraEdit"/>
        </item>
        <item row="3" column="1">
-        <widget class="QLineEdit" name="lineEdit_4"/>
+        <widget class="QLineEdit" name="uuidEdit"/>
        </item>
        <item row="8" column="0">
-        <widget class="QLabel" name="label_11">
+        <widget class="QLabel" name="fp">
          <property name="text">
           <string>Fingerprint</string>
          </property>
         </widget>
        </item>
        <item row="8" column="1">
-        <widget class="QComboBox" name="comboBox_4">
+        <widget class="QComboBox" name="fpCBox">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -316,8 +301,63 @@
          </item>
         </widget>
        </item>
+       <item row="2" column="1">
+        <widget class="QSpinBox" name="portSBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>65535</number>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QWidget" name="widget" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Node: </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelError">
+        <property name="styleSheet">
+         <string notr="true">color: rgb(255, 0, 0);</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>

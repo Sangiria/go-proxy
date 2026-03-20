@@ -19,9 +19,6 @@ func UpdateNodeFromForm(node *models.Node, node_form *api.NodeForm) error {
 	}
 
 	if node_form.Port != nil {
-		if uint16(*node_form.Port) == 0 {
-			return errors.New("invalid port (1-65535)")
-		}
 		node.Parsed.Port = uint16(*node_form.Port)
 	}
 
@@ -61,11 +58,15 @@ func UpdateNodeFromForm(node *models.Node, node_form *api.NodeForm) error {
 	}
 
 	if node_form.Extra != nil {
-		extra, err := links.ParseExtra(*node_form.Extra)
-		if err != nil {
-			return err
+		if *node_form.Extra != "" {
+			extra, err := links.ParseExtra(*node_form.Extra)
+			if err != nil {
+				return err
+			}
+			node.Parsed.XHTTPExtra = extra
+		} else {
+			node.Parsed.XHTTPExtra = nil
 		}
-		node.Parsed.XHTTPExtra = extra
 	}
 	
 	return nil

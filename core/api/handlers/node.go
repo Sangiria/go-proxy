@@ -15,13 +15,13 @@ import (
 
 func mapToApiNode(id string, node *models.Node) *api.Node {
     return &api.Node{
-        Id:        id,
-        Type:      node.Parsed.Type,
-        Name:      node.Name,
-        Address:   node.Parsed.Address,
-        Port:      int32(node.Parsed.Port),
-        Transport: node.Parsed.Transport,
-        Tls:       node.Parsed.Security,
+        Id:        	id,
+        Type:      	node.Parsed.Type,
+        Name:      	node.Name,
+        Address:   	node.Parsed.Address,
+        Port:      	int32(node.Parsed.Port),
+        Transport: 	node.Parsed.Transport,
+        Security: 	node.Parsed.Security,
     }
 }
 
@@ -75,9 +75,6 @@ func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api
     }
 
     node := n.FindNode(&api.Id{Id: message.Id, SourceId: message.SourceId})
-    if node == nil {
-        return nil, status.Errorf(codes.NotFound, "node not found")
-    }
 
     if err := service.UpdateNodeFromForm(node, message); err != nil {
         return nil, status.Errorf(codes.InvalidArgument, "update failed: %v", err)
@@ -91,10 +88,5 @@ func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api
 }
 
 func (n *NodeService) GetNode(ctx context.Context, message *api.Id) (*api.NodeForm, error) {
-	node := n.FindNode(message)
-	if node == nil {
-		return nil, status.Errorf(codes.NotFound, "node not found")
-	}
-
-	return mapToApiNodeForm(node), nil
+	return mapToApiNodeForm(n.FindNode(message)), nil
 }

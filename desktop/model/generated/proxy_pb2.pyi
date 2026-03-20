@@ -15,22 +15,22 @@ class State(_message.Message):
     def __init__(self, manual: _Optional[_Iterable[_Union[Node, _Mapping]]] = ..., subscription: _Optional[_Iterable[_Union[Subscription, _Mapping]]] = ...) -> None: ...
 
 class Node(_message.Message):
-    __slots__ = ("id", "type", "name", "address", "port", "transport", "tls")
+    __slots__ = ("id", "type", "name", "address", "port", "transport", "security")
     ID_FIELD_NUMBER: _ClassVar[int]
     TYPE_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     ADDRESS_FIELD_NUMBER: _ClassVar[int]
     PORT_FIELD_NUMBER: _ClassVar[int]
     TRANSPORT_FIELD_NUMBER: _ClassVar[int]
-    TLS_FIELD_NUMBER: _ClassVar[int]
+    SECURITY_FIELD_NUMBER: _ClassVar[int]
     id: str
     type: str
     name: str
     address: str
     port: int
     transport: str
-    tls: str
-    def __init__(self, id: _Optional[str] = ..., type: _Optional[str] = ..., name: _Optional[str] = ..., address: _Optional[str] = ..., port: _Optional[int] = ..., transport: _Optional[str] = ..., tls: _Optional[str] = ...) -> None: ...
+    security: str
+    def __init__(self, id: _Optional[str] = ..., type: _Optional[str] = ..., name: _Optional[str] = ..., address: _Optional[str] = ..., port: _Optional[int] = ..., transport: _Optional[str] = ..., security: _Optional[str] = ...) -> None: ...
 
 class Subscription(_message.Message):
     __slots__ = ("id", "name", "nodes")
@@ -49,7 +49,7 @@ class Url(_message.Message):
     def __init__(self, url: _Optional[str] = ...) -> None: ...
 
 class NodeForm(_message.Message):
-    __slots__ = ("id", "name", "address", "port", "uuid", "transport", "security", "sni", "fp", "pbk", "sid", "mode", "extra")
+    __slots__ = ("id", "name", "address", "port", "uuid", "transport", "security", "sni", "fp", "pbk", "sid", "mode", "extra", "source_id")
     ID_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     ADDRESS_FIELD_NUMBER: _ClassVar[int]
@@ -63,6 +63,7 @@ class NodeForm(_message.Message):
     SID_FIELD_NUMBER: _ClassVar[int]
     MODE_FIELD_NUMBER: _ClassVar[int]
     EXTRA_FIELD_NUMBER: _ClassVar[int]
+    SOURCE_ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     name: str
     address: str
@@ -76,7 +77,8 @@ class NodeForm(_message.Message):
     sid: str
     mode: str
     extra: str
-    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., address: _Optional[str] = ..., port: _Optional[int] = ..., uuid: _Optional[str] = ..., transport: _Optional[str] = ..., security: _Optional[str] = ..., sni: _Optional[str] = ..., fp: _Optional[str] = ..., pbk: _Optional[str] = ..., sid: _Optional[str] = ..., mode: _Optional[str] = ..., extra: _Optional[str] = ...) -> None: ...
+    source_id: str
+    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., address: _Optional[str] = ..., port: _Optional[int] = ..., uuid: _Optional[str] = ..., transport: _Optional[str] = ..., security: _Optional[str] = ..., sni: _Optional[str] = ..., fp: _Optional[str] = ..., pbk: _Optional[str] = ..., sid: _Optional[str] = ..., mode: _Optional[str] = ..., extra: _Optional[str] = ..., source_id: _Optional[str] = ...) -> None: ...
 
 class SubscriptionForm(_message.Message):
     __slots__ = ("id", "name", "url")
@@ -87,6 +89,14 @@ class SubscriptionForm(_message.Message):
     name: str
     url: str
     def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., url: _Optional[str] = ...) -> None: ...
+
+class Id(_message.Message):
+    __slots__ = ("id", "source_id")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    SOURCE_ID_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    source_id: str
+    def __init__(self, id: _Optional[str] = ..., source_id: _Optional[str] = ...) -> None: ...
 
 class Null(_message.Message):
     __slots__ = ()

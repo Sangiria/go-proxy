@@ -14,7 +14,7 @@ message Node {
   string address = 4;
   int32 port = 5;
   string transport = 6;
-  string tls = 7;
+  string security = 7;
 }
 
 message Subscription {
