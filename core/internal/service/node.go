@@ -11,10 +11,16 @@ import (
 
 func UpdateNodeFromForm(node *models.Node, node_form *api.NodeForm) error {
 	if node_form.Name != nil {
+		if *node_form.Name == "" {
+			return errors.New("name cannot be empty")
+		}
 		node.Name = *node_form.Name
 	}
 
 	if node_form.Address != nil {
+		if *node_form.Address == "" {
+			return errors.New("host cannot be empty")
+		}
 		node.Parsed.Address = *node_form.Address
 	}
 
@@ -72,12 +78,20 @@ func UpdateNodeFromForm(node *models.Node, node_form *api.NodeForm) error {
 	return nil
 }
 
-func UpdateSubscriptionFromForm(sub *models.Subscription, sub_form *api.SubscriptionForm) {
+func UpdateSubscriptionFromForm(sub *models.Subscription, sub_form *api.SubscriptionForm) error {
 	if sub_form.Name != nil {
+		if *sub_form.Name == "" {
+			return errors.New("name cannot be empty")
+		}
 		sub.Name = *sub_form.Name
 	}
 
 	if sub_form.Url != nil {
+		if *sub_form.Url == "" {
+			return errors.New("url cannot be empty")
+		}
 		sub.URL = *sub_form.Url
 	}
+
+	return nil
 }

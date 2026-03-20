@@ -71,7 +71,7 @@ func (n *NodeService) AddNode(ctx context.Context, message *api.Url) (*api.Node,
 func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api.Null, error) {
     empty := &api.NodeForm{Id: message.Id, SourceId: message.SourceId}
     if proto.Equal(message, empty) {
-        return nil, status.Errorf(codes.InvalidArgument, "the form is empty")
+        return nil, status.Errorf(codes.InvalidArgument, "nothing to update")
     }
 
     node := n.FindNode(&api.Id{Id: message.Id, SourceId: message.SourceId})
