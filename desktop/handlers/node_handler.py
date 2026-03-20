@@ -1,5 +1,4 @@
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QDialog
+from PySide6.QtCore import Qt, QTimer
 from model.worker import GrpcWorker, stub
 from model.generated import proxy_pb2
 import grpc
@@ -84,10 +83,12 @@ class AddHandler(GrpcHandler):
 class GetHandler(GrpcHandler):
     def __init__(self, view):
         super().__init__(view)
+        self.edit_handler = None
     def handle_get(self, item):
         item_id = item.data(0, Qt.UserRole)
         item_role = item.data(0, Qt.UserRole + 1)
-        edit_handler = EditHandler(self.view)
+
+        self.edit_handler = EditHandler(self.view)
 
         id_args = {"id": str(item_id)}
         
@@ -104,7 +105,7 @@ class GetHandler(GrpcHandler):
             if source_id:
                 response.source_id = str(source_id)
 
-            edit_handler.show_edit_dialog(response, item_role)
+            self.edit_handler.show_edit_dialog(response, item_role)
 
         if item_role == "node":
             self.worker = GrpcWorker(stub.GetNode, proxy_pb2.Id(**id_args))
@@ -130,22 +131,20 @@ class EditHandler(GrpcHandler):
         self.dialog.exec()
     def process_edit(self, role):
         delta = getattr(self.dialog, 'delta', None)
-        full = getattr(self.dialog, 'full', None)
-
         if delta:
             self.dialog.setEnabled(False)
             method = stub.EditNode if role == "node" else stub.EditSubscription
-            self.handle_edit(method, delta, full)
-    def handle_edit(self, method, delta, full):
+            self.handle_edit(method, delta)
+    def handle_edit(self, method, delta):
         self.worker = GrpcWorker(method, delta)
-        self.worker.success.connect(lambda: self.edit_success(full))
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.worker.success.connect(lambda: self.edit_success(delta))
         self.worker.error.connect(self.edit_error)
         self.worker.start()
     def edit_success(self, data):
-        if self.dialog:
-            super(type(self.dialog), self.dialog).accept()
-        
         self.view.update_item(data)
+        if self.dialog:
+            QTimer.singleShot(100, self.dialog.accept)
     def edit_error(self, err):
         self.dialog.setEnabled(True)
 

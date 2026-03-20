@@ -71,10 +71,12 @@ func (n *NodeService) EditSubscription(ctx context.Context, message *api.Subscri
 	empty := &api.SubscriptionForm{Id: message.Id}
 
 	if proto.Equal(message, empty) {
-		return nil, status.Errorf(codes.InvalidArgument, "the form is empty")
+		return nil, status.Errorf(codes.InvalidArgument, "nothing to update")
 	}
 
-	service.UpdateSubscriptionFromForm(n.state.Subscriptions[message.Id], message)
+	if err := service.UpdateSubscriptionFromForm(n.state.Subscriptions[message.Id], message); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "update failed: %v", err)
+	}
 
 	if err := file.SaveState(n.state); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())

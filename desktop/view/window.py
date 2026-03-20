@@ -15,6 +15,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeWidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.treeWidget.customContextMenuRequested.connect(self.open_context_menu)
 
+        self.columns = {
+            "name": 0,
+            "address": 2,
+            "transport": 3,
+            "port": 4,
+            "security": 5
+        }
+
         QTimer.singleShot(0, self.get_state_handler.handle_get_state)
     def open_context_menu(self, position):
         item = self.treeWidget.itemAt(position)
@@ -58,19 +66,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             sub.addChild(node)
 
         self.treeWidget.expandItem(sub)
-    def update_item(self, item_data):
+    def update_item(self, data):
         iterator = QTreeWidgetItemIterator(self.treeWidget)
+        target = None
+
         while iterator.value():
             item = iterator.value()
-            if item.data(0, Qt.UserRole) == item_data.id:
-                item.setText(0, str(item_data.name))
-                if item.data(0, Qt.UserRole + 1) == "node":
-                    item.setText(0, str(item_data.name))
-                    item.setText(2, str(item_data.address))
-                    item.setText(3, str(item_data.transport))
-                    item.setText(4, str(item_data.port))
-                    item.setText(5, str(item_data.security))
-                if item.data(0, Qt.UserRole + 1) == "sub":
-                    item.setText(0, str(item_data.name))
-                return
+            if item.data(0, Qt.UserRole) == data.id:
+                target = item
+                break
             iterator += 1
+
+        if not target:
+            return
+        
+        for field, value in data.ListFields():
+            attr = field.name
+            if field.name in self.columns:
+                col_idx = self.columns[attr]
+                display_value = str(value)
+                target.setText(col_idx, display_value)
