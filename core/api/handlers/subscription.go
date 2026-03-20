@@ -74,10 +74,6 @@ func (n *NodeService) EditSubscription(ctx context.Context, message *api.Subscri
 		return nil, status.Errorf(codes.InvalidArgument, "the form is empty")
 	}
 
-	if n.state.Subscriptions[message.Id] == nil {
-		return nil, status.Errorf(codes.NotFound, "subscription not found")
-	}
-
 	service.UpdateSubscriptionFromForm(n.state.Subscriptions[message.Id], message)
 
 	if err := file.SaveState(n.state); err != nil {
@@ -89,9 +85,6 @@ func (n *NodeService) EditSubscription(ctx context.Context, message *api.Subscri
 
 func (n *NodeService) GetSubscription(ctx context.Context, message *api.Id) (*api.SubscriptionForm, error) {
 	sub := n.FindSubscription(message.Id)
-	if sub == nil {
-		return nil, status.Errorf(codes.NotFound, "subscription not found")
-	}
 
 	return &api.SubscriptionForm{
 		Name: &sub.Name,

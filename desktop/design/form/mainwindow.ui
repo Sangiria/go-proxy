@@ -95,7 +95,7 @@
       </column>
       <column>
        <property name="text">
-        <string>TLS</string>
+        <string>Security</string>
        </property>
       </column>
      </widget>

@@ -44,6 +44,16 @@ class NodeServiceStub(object):
                 request_serializer=proxy__pb2.Url.SerializeToString,
                 response_deserializer=proxy__pb2.Subscription.FromString,
                 _registered_method=True)
+        self.GetNode = channel.unary_unary(
+                '/goproxy.NodeService/GetNode',
+                request_serializer=proxy__pb2.Id.SerializeToString,
+                response_deserializer=proxy__pb2.NodeForm.FromString,
+                _registered_method=True)
+        self.GetSubscription = channel.unary_unary(
+                '/goproxy.NodeService/GetSubscription',
+                request_serializer=proxy__pb2.Id.SerializeToString,
+                response_deserializer=proxy__pb2.SubscriptionForm.FromString,
+                _registered_method=True)
         self.EditNode = channel.unary_unary(
                 '/goproxy.NodeService/EditNode',
                 request_serializer=proxy__pb2.NodeForm.SerializeToString,
@@ -71,6 +81,18 @@ class NodeServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def AddSubscription(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetNode(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetSubscription(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -106,6 +128,16 @@ def add_NodeServiceServicer_to_server(servicer, server):
                     servicer.AddSubscription,
                     request_deserializer=proxy__pb2.Url.FromString,
                     response_serializer=proxy__pb2.Subscription.SerializeToString,
+            ),
+            'GetNode': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetNode,
+                    request_deserializer=proxy__pb2.Id.FromString,
+                    response_serializer=proxy__pb2.NodeForm.SerializeToString,
+            ),
+            'GetSubscription': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSubscription,
+                    request_deserializer=proxy__pb2.Id.FromString,
+                    response_serializer=proxy__pb2.SubscriptionForm.SerializeToString,
             ),
             'EditNode': grpc.unary_unary_rpc_method_handler(
                     servicer.EditNode,
@@ -177,6 +209,60 @@ class NodeService(object):
             '/goproxy.NodeService/AddSubscription',
             proxy__pb2.Url.SerializeToString,
             proxy__pb2.Subscription.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetNode(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/goproxy.NodeService/GetNode',
+            proxy__pb2.Id.SerializeToString,
+            proxy__pb2.NodeForm.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetSubscription(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/goproxy.NodeService/GetSubscription',
+            proxy__pb2.Id.SerializeToString,
+            proxy__pb2.SubscriptionForm.FromString,
             options,
             channel_credentials,
             insecure,
