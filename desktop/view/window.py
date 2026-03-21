@@ -8,6 +8,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
+        self.treeWidget.setColumnWidth(0, 200)
+
         self.add_handler = AddHandler(self)
         self.get_state_handler = GetFullStateHandler(self)
 

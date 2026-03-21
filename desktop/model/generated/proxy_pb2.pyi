@@ -7,12 +7,14 @@ from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class State(_message.Message):
-    __slots__ = ("manual", "subscription")
+    __slots__ = ("manual", "subscription", "order")
     MANUAL_FIELD_NUMBER: _ClassVar[int]
     SUBSCRIPTION_FIELD_NUMBER: _ClassVar[int]
+    ORDER_FIELD_NUMBER: _ClassVar[int]
     manual: _containers.RepeatedCompositeFieldContainer[Node]
     subscription: _containers.RepeatedCompositeFieldContainer[Subscription]
-    def __init__(self, manual: _Optional[_Iterable[_Union[Node, _Mapping]]] = ..., subscription: _Optional[_Iterable[_Union[Subscription, _Mapping]]] = ...) -> None: ...
+    order: _containers.RepeatedCompositeFieldContainer[Id]
+    def __init__(self, manual: _Optional[_Iterable[_Union[Node, _Mapping]]] = ..., subscription: _Optional[_Iterable[_Union[Subscription, _Mapping]]] = ..., order: _Optional[_Iterable[_Union[Id, _Mapping]]] = ...) -> None: ...
 
 class Node(_message.Message):
     __slots__ = ("id", "type", "name", "address", "port", "transport", "security")

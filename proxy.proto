@@ -5,6 +5,7 @@ package goproxy;
 message State {
   repeated Node manual = 1;
   repeated Subscription subscription = 2;
+  repeated Id order = 3;
 }
 
 message Node {

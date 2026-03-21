@@ -59,7 +59,7 @@ func (n *NodeService) AddNode(ctx context.Context, message *api.Url) (*api.Node,
 	}
 
 	n.state.Manual[node_key] = node
-	n.state.ManualOrder = append(n.state.ManualOrder, node_key)
+	n.state.ItemsOrder = append(n.state.ItemsOrder, node_key)
 
 	if err := file.SaveState(n.state); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
