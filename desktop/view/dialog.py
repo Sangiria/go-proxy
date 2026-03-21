@@ -106,7 +106,7 @@ class EditNodeDialog(EditDialog, Ui_EditNode):
         }
         self.setup()
     
-class AddDialog(EditDialog, Ui_AddSubscription):
+class AddDialog(QDialog, Ui_AddSubscription):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)

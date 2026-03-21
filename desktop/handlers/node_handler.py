@@ -12,14 +12,23 @@ class GetFullStateHandler(GrpcHandler):
     def __init__(self, view):
         super().__init__(view)
     def handle_get_state(self):
+        if self.worker and self.worker.isRunning():
+            return
         self.worker = GrpcWorker(stub.GetFullState, proxy_pb2.Null())
         self.worker.success.connect(self.get_state_success) 
+        self.worker.finished.connect(self.worker.deleteLater)
         self.worker.start()
     def get_state_success(self, response):
-        for m in response.manual:
-            self.view.add_node(m)
-        for s in response.subscription:
-            self.view.add_sub(s)
+        manual_map = {m.id: m for m in response.manual}
+        sub_map = {s.id: s for s in response.subscription}
+
+        for item in response.order:
+            item_id = item.id
+            
+            if item_id in manual_map:
+                self.view.add_node(manual_map[item_id])
+            elif item_id in sub_map:
+                self.view.add_sub(sub_map[item_id])
 class AddHandler(GrpcHandler):
     def __init__(self, view):
         super().__init__(view)
@@ -40,21 +49,22 @@ class AddHandler(GrpcHandler):
         self.dialog.labelError.setStyleSheet("color: black;")
         self.dialog.labelError.setText("adding...")
 
-        self.dialog.setEnabled(False)
         if url.startswith(("http", "https")):
             self.worker = GrpcWorker(stub.AddSubscription, proxy_pb2.Url(url=url))
         else:
             self.worker = GrpcWorker(stub.AddNode, proxy_pb2.Url(url=url))
 
+        self.dialog.setEnabled(False)
         self.worker.success.connect(self.add_success) 
         self.worker.error.connect(self.add_error)
+        self.worker.finished.connect(self.worker.deleteLater)
         self.worker.start()
     def add_success(self, response):
-        self.dialog.accept()
         if isinstance(response, proxy_pb2.Node):
             self.view.add_node(response)
         elif isinstance(response, proxy_pb2.Subscription):
-            self.view.add_sub(response)
+            self.view.add_sub(response)   
+        self.dialog.accept()
     def add_error(self, err):
         self.dialog.setEnabled(True)
         self.dialog.labelError.setStyleSheet("color: red;")

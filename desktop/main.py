@@ -1,7 +1,15 @@
+import os
 import sys
+
+if sys.platform == "linux":
+    os.environ["QT_QPA_PLATFORM"] = "xcb"
+
 from PyQt6.QtWidgets import QApplication
 from view.window import MainWindow
 from model.worker import channel
+
+import faulthandler
+faulthandler.enable()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

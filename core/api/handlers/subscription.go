@@ -38,7 +38,7 @@ func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*a
 		Nodes: make(map[string]*models.Node, len(node_links)),
 		NodeOrder: make([]string, 0),
 	}
-	n.state.SubscriptionOrder = append(n.state.SubscriptionOrder, sub_key)
+	n.state.ItemsOrder = append(n.state.ItemsOrder, sub_key)
 
 	var nodes = make([]*api.Node, len(node_links))
 
