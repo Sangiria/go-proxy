@@ -37,18 +37,19 @@ func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*a
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	n.state.Subscriptions[sub_key] = &models.Subscription{
+	sub := &models.Subscription{
 		Name: name.Host,
 		URL: message.Url,
 		Nodes: make(map[string]*models.Node, 0),
 		NodeOrder: make([]string, 0),
 	}
 
-	nodes, err := n.UpdateSubscriptionNodes(n.state.Subscriptions[sub_key])
+	nodes, err := n.UpdateSubscriptionNodes(sub)
 	if err != nil {
 		return nil, status.Error(codes.Canceled, err.Error())
 	}
 
+	n.state.Subscriptions[sub_key] = sub
 	n.state.ItemsOrder = append(n.state.ItemsOrder, sub_key)
 
 	if err := file.SaveState(n.state); err != nil {
@@ -101,6 +102,10 @@ func (n *NodeService) DeleteSubscription(ctx context.Context, message *api.Id) (
 			delete(n.state.Subscriptions, sub_key)
 		}
 	}
+
+	if err := file.SaveState(n.state); err != nil {
+        return nil, status.Errorf(codes.Internal, "save error: %v", err)
+    }
 
 	return &api.Null{}, nil
 }

@@ -55,7 +55,7 @@ func (n *NodeService) UpdateSubscriptionNodes(sub *models.Subscription) (*api.No
 	var (
 		added = make([]*api.Node, len(node_links))
 		nodes = make(map[string]*models.Node, len(node_links))
-		nodes_order = make([]string, 0)
+		nodes_order = make([]string, len(node_links))
 	)
 
 	for id, link := range node_links{
@@ -67,7 +67,7 @@ func (n *NodeService) UpdateSubscriptionNodes(sub *models.Subscription) (*api.No
 		}
 
 		nodes[node_key] = node
-		nodes_order = append(nodes_order, node_key)
+		nodes_order[id] = node_key
 		added[id] = mapToApiNode(node_key, node)
 	}
 

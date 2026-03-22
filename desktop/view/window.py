@@ -4,6 +4,7 @@ from design.mainwindow import Ui_MainWindow
 from handlers.node.add import AddHandler
 from handlers.node.state import GetFullStateHandler
 from handlers.node.get import GetHandler
+from handlers.node.delete import DeleteHandler
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -52,7 +53,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.get_handler = GetHandler(self)
             self.get_handler.handle_get(item)
         if action == delete_action:
-            pass
+            self.delete_handler = DeleteHandler(self)
+            self.delete_handler.handle_delete(item)
+    def remove_item(self, item):
+        parent = item.parent()
+    
+        if parent:
+            parent.removeChild(item)
+        else:
+            index = self.treeWidget.indexOfTopLevelItem(item)
+            if index != -1:
+                self.treeWidget.takeTopLevelItem(index)
+        del item
+
     def create_node_item(self, item, item_type="node"):
         if item_type == "node":
             row_data = [
