@@ -14,21 +14,23 @@ type State struct {
 }
 
 func SaveState(s *State) error {
-	file, err := os.OpenFile("./state/state.json", os.O_WRONLY|os.O_TRUNC, 0)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
+	tmp_path := "./state/state.json.tmp"
+    final_path := "./state/state.json"
 
-	enc := json.NewEncoder(file)
+    f, err := os.Create(tmp_path)
+    if err != nil { return err }
+    defer f.Close()
+
+    enc := json.NewEncoder(f)
 	enc.SetEscapeHTML(false)
 	enc.SetIndent("", "\t")
 
-	if err := enc.Encode(s); err != nil {
-		return err
+    if err := enc.Encode(s); err != nil { 
+		return err 
 	}
+    f.Close()
 
-	return nil
+    return os.Rename(tmp_path, final_path)
 }
 
 //HandleAdd saves nodes and subscription if exists to file
