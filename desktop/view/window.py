@@ -1,10 +1,12 @@
 from PySide6.QtWidgets import QMainWindow, QTreeWidgetItem, QMenu, QTreeWidgetItemIterator
 from PySide6.QtCore import Qt, QTimer, QEvent
 from design.mainwindow import Ui_MainWindow
+from view.notification import Notification
 from handlers.node.add import AddHandler
 from handlers.node.state import GetFullStateHandler
 from handlers.node.get import GetHandler
 from handlers.node.delete import DeleteHandler
+from handlers.node.update import UpdateHandler
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -43,8 +45,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         item = self.treeWidget.itemAt(position)
         if not item:
             return
+        
+        item_type = item.data(0, Qt.UserRole + 1)
 
         menu = QMenu()
+        update_action = None
+        if item_type == "sub":
+            update_action = menu.addAction("Update")
+            menu.addSeparator()
+
         edit_action = menu.addAction("Edit")
         delete_action = menu.addAction("Delete")
     
@@ -55,6 +64,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if action == delete_action:
             self.delete_handler = DeleteHandler(self)
             self.delete_handler.handle_delete(item)
+        if action == update_action:
+            self.update_handler = UpdateHandler(self)
+            self.update_handler.handle_update(item)
+
+    def update_sub_nodes(self, sub, nodes_data):
+        sub.takeChildren()
+        for n in nodes_data: 
+            node = self.create_node_item(n, "node")
+            sub.addChild(node)
+        self.treeWidget.expandItem(sub)
+
+    def show_notification(self, text, is_error=False):
+        self.toast = Notification(self, text, is_error)
     def remove_item(self, item):
         parent = item.parent()
     
