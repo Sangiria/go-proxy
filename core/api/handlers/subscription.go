@@ -14,6 +14,16 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+func (n *NodeService) UpdateSubscription(ctx context.Context, message *api.Id) (*api.Nodes, error)  {
+	sub := n.FindSubscription(message.Id)
+
+	nodes, err := n.UpdateSubscriptionNodes(sub)
+	if err != nil {
+		return nil, status.Error(codes.Canceled, err.Error())
+	}
+	return nodes, nil
+}
+
 func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*api.Subscription, error) {
 	sub_key := links.GenerateID(message.Url)
 
@@ -27,34 +37,19 @@ func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*a
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	node_links, err := links.FetchVLESSLinks(message.Url)
-	if err != nil {
-		return nil, status.Errorf(codes.Canceled, "error getting subscribtion")
-	}
-
 	n.state.Subscriptions[sub_key] = &models.Subscription{
 		Name: name.Host,
 		URL: message.Url,
-		Nodes: make(map[string]*models.Node, len(node_links)),
+		Nodes: make(map[string]*models.Node, 0),
 		NodeOrder: make([]string, 0),
 	}
-	n.state.ItemsOrder = append(n.state.ItemsOrder, sub_key)
 
-	var nodes = make([]*api.Node, len(node_links))
-
-	for id, link := range node_links{
-		node_key := links.GenerateID(link)
-
-		node, err := links.ParseURLToNode(link)
-		if err != nil {
-			return nil, status.Error(codes.Canceled, err.Error())
-		}
-
-		n.state.Subscriptions[sub_key].Nodes[node_key] = node
-		n.state.Subscriptions[sub_key].NodeOrder = append(n.state.Subscriptions[sub_key].NodeOrder, node_key)
-
-		nodes[id] = mapToApiNode(node_key, node)
+	nodes, err := n.UpdateSubscriptionNodes(n.state.Subscriptions[sub_key])
+	if err != nil {
+		return nil, status.Error(codes.Canceled, err.Error())
 	}
+
+	n.state.ItemsOrder = append(n.state.ItemsOrder, sub_key)
 
 	if err := file.SaveState(n.state); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -92,4 +87,20 @@ func (n *NodeService) GetSubscription(ctx context.Context, message *api.Id) (*ap
 		Name: &sub.Name,
 		Url: &sub.URL,
 	}, nil
+}
+
+func (n *NodeService) DeleteSubscription(ctx context.Context, message *api.Id) (*api.Null, error) {
+	_, ok := n.state.Subscriptions[message.Id].Nodes[n.state.ActiveNodeId]
+	if ok {
+		return nil, status.Errorf(codes.PermissionDenied, "this subscription has active node")
+	}
+
+	for id, sub_key := range n.state.ItemsOrder {
+		if sub_key == message.Id {
+			n.state.ItemsOrder = append(n.state.ItemsOrder[:id], n.state.ItemsOrder[id+1:]...)
+			delete(n.state.Subscriptions, sub_key)
+		}
+	}
+
+	return &api.Null{}, nil
 }

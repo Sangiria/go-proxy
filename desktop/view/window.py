@@ -1,7 +1,9 @@
 from PySide6.QtWidgets import QMainWindow, QTreeWidgetItem, QMenu, QTreeWidgetItemIterator
 from PySide6.QtCore import Qt, QTimer
 from design.mainwindow import Ui_MainWindow
-from handlers.node_handler import AddHandler, GetFullStateHandler, GetHandler
+from handlers.node.add import AddHandler
+from handlers.node.state import GetFullStateHandler
+from handlers.node.get import GetHandler
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -62,8 +64,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def add_sub(self, item):
         sub = self.create_node_item(item, "sub")
         self.treeWidget.addTopLevelItem(sub)
-
-        for n in item.nodes:
+        
+        for n in item.nodes.nodes: 
             node = self.create_node_item(n, "node")
             sub.addChild(node)
 

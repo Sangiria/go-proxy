@@ -21,7 +21,7 @@ message Node {
 message Subscription {
   string id = 1;
   string name = 2;
-  repeated Node nodes = 3;
+  Nodes nodes = 3;
 }
 
 message Url {
@@ -56,6 +56,10 @@ message Id {
   optional string source_id = 2;
 }
 
+message Nodes {
+  repeated Node nodes = 1;
+}
+
 message Null {}
 
 service NodeService {
@@ -66,4 +70,7 @@ service NodeService {
   rpc EditNode (NodeForm) returns (Null);
   rpc EditSubscription (SubscriptionForm) returns (Null);
   rpc GetFullState (Null) returns (State);
+  rpc DeleteNode (Id) returns (Null);
+  rpc DeleteSubscription (Id) returns (Null);
+  rpc UpdateSubscription (Id) returns (Nodes);
 }
