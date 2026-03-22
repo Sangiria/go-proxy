@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QThread, pyqtSignal
+from PySide6.QtCore import QThread, Signal
 from model.generated import proxy_pb2_grpc
 import grpc
 
@@ -6,8 +6,8 @@ channel = grpc.insecure_channel('localhost:3333')
 stub = proxy_pb2_grpc.NodeServiceStub(channel)
 
 class GrpcWorker(QThread):
-    success = pyqtSignal(object)
-    error = pyqtSignal(object)
+    success = Signal(object)
+    error = Signal(object)
 
     def __init__(self, method, *args):
         super().__init__()

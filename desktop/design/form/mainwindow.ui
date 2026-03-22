@@ -34,20 +34,22 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QPushButton" name="btnAddSubscription">
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="text">
-          <string>Add</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnUpdate">
-         <property name="text">
-          <string>Update</string>
-         </property>
+        <widget class="QComboBox" name="typeCBox">
+         <item>
+          <property name="text">
+           <string>All</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Manual</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Subscriptions</string>
+          </property>
+         </item>
         </widget>
        </item>
        <item>
@@ -68,6 +70,9 @@
     </item>
     <item>
      <widget class="QTreeWidget" name="treeWidget">
+      <property name="focusPolicy">
+       <enum>Qt::ClickFocus</enum>
+      </property>
       <column>
        <property name="text">
         <string>Name</string>
@@ -142,6 +147,16 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnAdd">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>Add</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

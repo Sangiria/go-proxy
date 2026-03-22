@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QMainWindow, QTreeWidgetItem, QMenu, QTreeWidgetItemIterator
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QEvent
 from design.mainwindow import Ui_MainWindow
 from handlers.node.add import AddHandler
 from handlers.node.state import GetFullStateHandler
@@ -11,11 +11,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         self.treeWidget.setColumnWidth(0, 200)
+        self.typeCBox.installEventFilter(self)
 
         self.add_handler = AddHandler(self)
         self.get_state_handler = GetFullStateHandler(self)
 
-        self.btnAddSubscription.clicked.connect(self.add_handler.handle_add)
+        self.btnAdd.clicked.connect(self.add_handler.handle_add)
         self.treeWidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.treeWidget.customContextMenuRequested.connect(self.open_context_menu)
 
@@ -28,6 +29,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         }
 
         QTimer.singleShot(0, self.get_state_handler.handle_get_state)
+
+    def eventFilter(self, obj, event):
+        if obj is self.typeCBox and event.type() == QEvent.Wheel:
+            if not self.typeCBox.view().isVisible():
+                return True
+        
+        return super().eventFilter(obj, event)
+
     def open_context_menu(self, position):
         item = self.treeWidget.itemAt(position)
         if not item:
