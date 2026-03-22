@@ -74,3 +74,29 @@ service NodeService {
   rpc DeleteSubscription (Id) returns (Null);
   rpc UpdateSubscription (Id) returns (Nodes);
 }
+
+message Status {
+  string logs = 1;
+}
+
+enum State {
+  DISCONNECTED = 0;
+  CONNECTING = 1;
+  CONNECTED = 2;
+  ERROR = 3;
+}
+
+message ProxyStatus {
+  State state = 1;
+  string message = 2;
+  double upload_speed = 3;
+  double download_speed = 4;
+}
+
+service ProxyService {
+  rpc ProxyStatus (Null) returns (stream ProxyStatus);
+  rpc StartProxy (Id) returns (Null); 
+  rpc StopProxy (Null) returns (Null);
+  rpc SwitchNode (Id) returns (Null);
+  rpc ToggleTun (Bool) returns (Null);
+}
