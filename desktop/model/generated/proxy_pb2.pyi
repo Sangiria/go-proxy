@@ -41,8 +41,8 @@ class Subscription(_message.Message):
     NODES_FIELD_NUMBER: _ClassVar[int]
     id: str
     name: str
-    nodes: _containers.RepeatedCompositeFieldContainer[Node]
-    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., nodes: _Optional[_Iterable[_Union[Node, _Mapping]]] = ...) -> None: ...
+    nodes: Nodes
+    def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., nodes: _Optional[_Union[Nodes, _Mapping]] = ...) -> None: ...
 
 class Url(_message.Message):
     __slots__ = ("url",)
@@ -99,6 +99,12 @@ class Id(_message.Message):
     id: str
     source_id: str
     def __init__(self, id: _Optional[str] = ..., source_id: _Optional[str] = ...) -> None: ...
+
+class Nodes(_message.Message):
+    __slots__ = ("nodes",)
+    NODES_FIELD_NUMBER: _ClassVar[int]
+    nodes: _containers.RepeatedCompositeFieldContainer[Node]
+    def __init__(self, nodes: _Optional[_Iterable[_Union[Node, _Mapping]]] = ...) -> None: ...
 
 class Null(_message.Message):
     __slots__ = ()

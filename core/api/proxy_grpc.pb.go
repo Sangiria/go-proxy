@@ -19,13 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	NodeService_AddNode_FullMethodName          = "/goproxy.NodeService/AddNode"
-	NodeService_AddSubscription_FullMethodName  = "/goproxy.NodeService/AddSubscription"
-	NodeService_GetNode_FullMethodName          = "/goproxy.NodeService/GetNode"
-	NodeService_GetSubscription_FullMethodName  = "/goproxy.NodeService/GetSubscription"
-	NodeService_EditNode_FullMethodName         = "/goproxy.NodeService/EditNode"
-	NodeService_EditSubscription_FullMethodName = "/goproxy.NodeService/EditSubscription"
-	NodeService_GetFullState_FullMethodName     = "/goproxy.NodeService/GetFullState"
+	NodeService_AddNode_FullMethodName            = "/goproxy.NodeService/AddNode"
+	NodeService_AddSubscription_FullMethodName    = "/goproxy.NodeService/AddSubscription"
+	NodeService_GetNode_FullMethodName            = "/goproxy.NodeService/GetNode"
+	NodeService_GetSubscription_FullMethodName    = "/goproxy.NodeService/GetSubscription"
+	NodeService_EditNode_FullMethodName           = "/goproxy.NodeService/EditNode"
+	NodeService_EditSubscription_FullMethodName   = "/goproxy.NodeService/EditSubscription"
+	NodeService_GetFullState_FullMethodName       = "/goproxy.NodeService/GetFullState"
+	NodeService_DeleteNode_FullMethodName         = "/goproxy.NodeService/DeleteNode"
+	NodeService_DeleteSubscription_FullMethodName = "/goproxy.NodeService/DeleteSubscription"
+	NodeService_UpdateSubscription_FullMethodName = "/goproxy.NodeService/UpdateSubscription"
 )
 
 // NodeServiceClient is the client API for NodeService service.
@@ -39,6 +42,9 @@ type NodeServiceClient interface {
 	EditNode(ctx context.Context, in *NodeForm, opts ...grpc.CallOption) (*Null, error)
 	EditSubscription(ctx context.Context, in *SubscriptionForm, opts ...grpc.CallOption) (*Null, error)
 	GetFullState(ctx context.Context, in *Null, opts ...grpc.CallOption) (*State, error)
+	DeleteNode(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Null, error)
+	DeleteSubscription(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Null, error)
+	UpdateSubscription(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Nodes, error)
 }
 
 type nodeServiceClient struct {
@@ -119,6 +125,36 @@ func (c *nodeServiceClient) GetFullState(ctx context.Context, in *Null, opts ...
 	return out, nil
 }
 
+func (c *nodeServiceClient) DeleteNode(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Null, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Null)
+	err := c.cc.Invoke(ctx, NodeService_DeleteNode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *nodeServiceClient) DeleteSubscription(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Null, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Null)
+	err := c.cc.Invoke(ctx, NodeService_DeleteSubscription_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *nodeServiceClient) UpdateSubscription(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Nodes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Nodes)
+	err := c.cc.Invoke(ctx, NodeService_UpdateSubscription_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NodeServiceServer is the server API for NodeService service.
 // All implementations must embed UnimplementedNodeServiceServer
 // for forward compatibility
@@ -130,6 +166,9 @@ type NodeServiceServer interface {
 	EditNode(context.Context, *NodeForm) (*Null, error)
 	EditSubscription(context.Context, *SubscriptionForm) (*Null, error)
 	GetFullState(context.Context, *Null) (*State, error)
+	DeleteNode(context.Context, *Id) (*Null, error)
+	DeleteSubscription(context.Context, *Id) (*Null, error)
+	UpdateSubscription(context.Context, *Id) (*Nodes, error)
 	mustEmbedUnimplementedNodeServiceServer()
 }
 
@@ -157,6 +196,15 @@ func (UnimplementedNodeServiceServer) EditSubscription(context.Context, *Subscri
 }
 func (UnimplementedNodeServiceServer) GetFullState(context.Context, *Null) (*State, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFullState not implemented")
+}
+func (UnimplementedNodeServiceServer) DeleteNode(context.Context, *Id) (*Null, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteNode not implemented")
+}
+func (UnimplementedNodeServiceServer) DeleteSubscription(context.Context, *Id) (*Null, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteSubscription not implemented")
+}
+func (UnimplementedNodeServiceServer) UpdateSubscription(context.Context, *Id) (*Nodes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateSubscription not implemented")
 }
 func (UnimplementedNodeServiceServer) mustEmbedUnimplementedNodeServiceServer() {}
 
@@ -297,6 +345,60 @@ func _NodeService_GetFullState_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NodeService_DeleteNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Id)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServiceServer).DeleteNode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NodeService_DeleteNode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServiceServer).DeleteNode(ctx, req.(*Id))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NodeService_DeleteSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Id)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServiceServer).DeleteSubscription(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NodeService_DeleteSubscription_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServiceServer).DeleteSubscription(ctx, req.(*Id))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NodeService_UpdateSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Id)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServiceServer).UpdateSubscription(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NodeService_UpdateSubscription_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServiceServer).UpdateSubscription(ctx, req.(*Id))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NodeService_ServiceDesc is the grpc.ServiceDesc for NodeService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -331,6 +433,18 @@ var NodeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFullState",
 			Handler:    _NodeService_GetFullState_Handler,
+		},
+		{
+			MethodName: "DeleteNode",
+			Handler:    _NodeService_DeleteNode_Handler,
+		},
+		{
+			MethodName: "DeleteSubscription",
+			Handler:    _NodeService_DeleteSubscription_Handler,
+		},
+		{
+			MethodName: "UpdateSubscription",
+			Handler:    _NodeService_UpdateSubscription_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

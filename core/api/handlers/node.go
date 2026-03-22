@@ -90,3 +90,32 @@ func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api
 func (n *NodeService) GetNode(ctx context.Context, message *api.Id) (*api.NodeForm, error) {
 	return mapToApiNodeForm(n.FindNode(message)), nil
 }
+
+func (n *NodeService) DeleteNode(ctx context.Context, message *api.Id) (*api.Null, error) {
+	if message.Id == n.state.ActiveNodeId {
+		return nil, status.Errorf(codes.PermissionDenied, "this node is active")
+	}
+
+	if message.SourceId != nil {
+		order := n.state.Subscriptions[*message.SourceId].NodeOrder
+		for id, node_key := range order {
+			if node_key == message.Id {
+				order = append(order[:id], order[id+1:]...)
+				delete(n.state.Subscriptions[*message.SourceId].Nodes, node_key)
+			}
+		}
+	} else {
+		for id, node_key := range n.state.ItemsOrder {
+			if node_key == message.Id {
+				n.state.ItemsOrder = append(n.state.ItemsOrder[:id], n.state.ItemsOrder[id+1:]...)
+				delete(n.state.Manual, node_key)
+			}
+		}
+	}
+
+	if err := file.SaveState(n.state); err != nil {
+        return nil, status.Errorf(codes.Internal, "save error: %v", err)
+    }
+
+	return &api.Null{}, nil
+}

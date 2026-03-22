@@ -4,7 +4,9 @@ import (
 	"context"
 	"core/api"
 	"core/internal/file"
+	"core/internal/links"
 	"core/models"
+	"errors"
 )
 
 type NodeService struct {
@@ -44,6 +46,38 @@ func (n *NodeService) FindNode(message *api.Id) *models.Node {
 	return target
 }
 
+func (n *NodeService) UpdateSubscriptionNodes(sub *models.Subscription) (*api.Nodes, error){
+	node_links, err := links.FetchVLESSLinks(sub.URL)
+	if err != nil {
+		return nil, errors.New("error getting nodes")
+	}
+
+	var (
+		added = make([]*api.Node, len(node_links))
+		nodes = make(map[string]*models.Node, len(node_links))
+		nodes_order = make([]string, 0)
+	)
+
+	for id, link := range node_links{
+		node_key := links.GenerateID(link)
+
+		node, err := links.ParseURLToNode(link)
+		if err != nil {
+			return nil, err
+		}
+
+		nodes[node_key] = node
+		nodes_order = append(nodes_order, node_key)
+		added[id] = mapToApiNode(node_key, node)
+	}
+
+	sub.Nodes, sub.NodeOrder = nodes, nodes_order
+	
+	return &api.Nodes{
+		Nodes: added,
+	}, nil
+}
+
 func (n *NodeService) GetFullState(ctx context.Context, message *api.Null) (*api.State, error) {
 	if n.state.Manual == nil && n.state.Subscriptions == nil {
 		return &api.State{}, nil
@@ -76,7 +110,9 @@ func (n *NodeService) GetFullState(ctx context.Context, message *api.Null) (*api
 			sub[sub_id] = &api.Subscription{
 				Id: item_key,
 				Name: n.state.Subscriptions[item_key].Name,
-				Nodes: nodes,
+				Nodes: &api.Nodes{
+					Nodes: nodes,
+				},
 			}
 
 			sub_id++
