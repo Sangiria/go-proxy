@@ -15,10 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QMainWindow,
-    QPushButton, QRadioButton, QSizePolicy, QSpacerItem,
-    QStatusBar, QToolButton, QTreeWidget, QTreeWidgetItem,
-    QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QHeaderView,
+    QMainWindow, QPushButton, QRadioButton, QSizePolicy,
+    QSpacerItem, QStatusBar, QToolButton, QTreeWidget,
+    QTreeWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -36,16 +36,13 @@ class Ui_MainWindow(object):
         self.widget.setStyleSheet(u"")
         self.horizontalLayout = QHBoxLayout(self.widget)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.btnAddSubscription = QPushButton(self.widget)
-        self.btnAddSubscription.setObjectName(u"btnAddSubscription")
-        self.btnAddSubscription.setStyleSheet(u"")
+        self.typeCBox = QComboBox(self.widget)
+        self.typeCBox.addItem("")
+        self.typeCBox.addItem("")
+        self.typeCBox.addItem("")
+        self.typeCBox.setObjectName(u"typeCBox")
 
-        self.horizontalLayout.addWidget(self.btnAddSubscription)
-
-        self.btnUpdate = QPushButton(self.widget)
-        self.btnUpdate.setObjectName(u"btnUpdate")
-
-        self.horizontalLayout.addWidget(self.btnUpdate)
+        self.horizontalLayout.addWidget(self.typeCBox)
 
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
@@ -56,6 +53,7 @@ class Ui_MainWindow(object):
 
         self.treeWidget = QTreeWidget(self.centralwidget)
         self.treeWidget.setObjectName(u"treeWidget")
+        self.treeWidget.setFocusPolicy(Qt.ClickFocus)
 
         self.verticalLayout.addWidget(self.treeWidget)
 
@@ -84,6 +82,12 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2.addItem(self.horizontalSpacer_2)
 
+        self.btnAdd = QPushButton(self.widget_2)
+        self.btnAdd.setObjectName(u"btnAdd")
+        self.btnAdd.setStyleSheet(u"")
+
+        self.horizontalLayout_2.addWidget(self.btnAdd)
+
 
         self.verticalLayout.addWidget(self.widget_2)
 
@@ -99,10 +103,12 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Go-proxy", None))
-        self.btnAddSubscription.setText(QCoreApplication.translate("MainWindow", u"Add", None))
-        self.btnUpdate.setText(QCoreApplication.translate("MainWindow", u"Update", None))
+        self.typeCBox.setItemText(0, QCoreApplication.translate("MainWindow", u"All", None))
+        self.typeCBox.setItemText(1, QCoreApplication.translate("MainWindow", u"Manual", None))
+        self.typeCBox.setItemText(2, QCoreApplication.translate("MainWindow", u"Subscriptions", None))
+
         ___qtreewidgetitem = self.treeWidget.headerItem()
-        ___qtreewidgetitem.setText(5, QCoreApplication.translate("MainWindow", u"TLS", None));
+        ___qtreewidgetitem.setText(5, QCoreApplication.translate("MainWindow", u"Security", None));
         ___qtreewidgetitem.setText(4, QCoreApplication.translate("MainWindow", u"Port", None));
         ___qtreewidgetitem.setText(3, QCoreApplication.translate("MainWindow", u"Transport", None));
         ___qtreewidgetitem.setText(2, QCoreApplication.translate("MainWindow", u"Address", None));
@@ -111,5 +117,6 @@ class Ui_MainWindow(object):
         self.btnStart.setText(QCoreApplication.translate("MainWindow", u"\u25b7", None))
         self.rdbtnTun.setText(QCoreApplication.translate("MainWindow", u"TUN", None))
         self.rdbtnSysProxy.setText(QCoreApplication.translate("MainWindow", u"System Proxy", None))
+        self.btnAdd.setText(QCoreApplication.translate("MainWindow", u"Add", None))
     # retranslateUi
 

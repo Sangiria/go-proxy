@@ -4,7 +4,7 @@ import sys
 if sys.platform == "linux":
     os.environ["QT_QPA_PLATFORM"] = "xcb"
 
-from PyQt6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication
 from view.window import MainWindow
 from model.worker import channel
 
