@@ -15,12 +15,17 @@ import (
 )
 
 func (n *NodeService) UpdateSubscription(ctx context.Context, message *api.Id) (*api.Nodes, error)  {
-	sub := n.FindSubscription(message.Id)
+	sub := n.findSubscription(message.Id)
 
-	nodes, err := n.UpdateSubscriptionNodes(sub)
+	nodes, err := n.updateSubscriptionNodes(sub)
 	if err != nil {
 		return nil, status.Error(codes.Canceled, err.Error())
 	}
+
+	if err := file.SaveState(n.state); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return nodes, nil
 }
 
@@ -44,7 +49,7 @@ func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*a
 		NodeOrder: make([]string, 0),
 	}
 
-	nodes, err := n.UpdateSubscriptionNodes(sub)
+	nodes, err := n.updateSubscriptionNodes(sub)
 	if err != nil {
 		return nil, status.Error(codes.Canceled, err.Error())
 	}
@@ -82,7 +87,7 @@ func (n *NodeService) EditSubscription(ctx context.Context, message *api.Subscri
 }
 
 func (n *NodeService) GetSubscription(ctx context.Context, message *api.Id) (*api.SubscriptionForm, error) {
-	sub := n.FindSubscription(message.Id)
+	sub := n.findSubscription(message.Id)
 
 	return &api.SubscriptionForm{
 		Name: &sub.Name,

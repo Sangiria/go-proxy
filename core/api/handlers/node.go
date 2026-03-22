@@ -74,7 +74,7 @@ func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api
         return nil, status.Errorf(codes.InvalidArgument, "nothing to update")
     }
 
-    node := n.FindNode(&api.Id{Id: message.Id, SourceId: message.SourceId})
+    node := n.findNode(&api.Id{Id: message.Id, SourceId: message.SourceId})
 
     if err := service.UpdateNodeFromForm(node, message); err != nil {
         return nil, status.Errorf(codes.InvalidArgument, "update failed: %v", err)
@@ -88,7 +88,7 @@ func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api
 }
 
 func (n *NodeService) GetNode(ctx context.Context, message *api.Id) (*api.NodeForm, error) {
-	return mapToApiNodeForm(n.FindNode(message)), nil
+	return mapToApiNodeForm(n.findNode(message)), nil
 }
 
 func (n *NodeService) DeleteNode(ctx context.Context, message *api.Id) (*api.Null, error) {
@@ -100,7 +100,7 @@ func (n *NodeService) DeleteNode(ctx context.Context, message *api.Id) (*api.Nul
 		order := n.state.Subscriptions[*message.SourceId].NodeOrder
 		for id, node_key := range order {
 			if node_key == message.Id {
-				order = append(order[:id], order[id+1:]...)
+				n.state.Subscriptions[*message.SourceId].NodeOrder = append(order[:id], order[id+1:]...)
 				delete(n.state.Subscriptions[*message.SourceId].Nodes, node_key)
 			}
 		}

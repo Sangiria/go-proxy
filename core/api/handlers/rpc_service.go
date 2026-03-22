@@ -22,7 +22,7 @@ func NewNodeService() (*NodeService, error) {
 	return &NodeService{state: state}, nil
 }
 
-func (n *NodeService) FindSubscription(id string) *models.Subscription {
+func (n *NodeService) findSubscription(id string) *models.Subscription {
 	sub, ok := n.state.Subscriptions[id]
 	if !ok {
 		return nil
@@ -30,11 +30,11 @@ func (n *NodeService) FindSubscription(id string) *models.Subscription {
 	return sub
 }
 
-func (n *NodeService) FindNode(message *api.Id) *models.Node {
+func (n *NodeService) findNode(message *api.Id) *models.Node {
 	var target *models.Node
 
     if message.SourceId != nil {
-        sub := n.FindSubscription(*message.SourceId)
+        sub := n.findSubscription(*message.SourceId)
         if sub == nil {
             return nil
         }
@@ -46,7 +46,7 @@ func (n *NodeService) FindNode(message *api.Id) *models.Node {
 	return target
 }
 
-func (n *NodeService) UpdateSubscriptionNodes(sub *models.Subscription) (*api.Nodes, error){
+func (n *NodeService) updateSubscriptionNodes(sub *models.Subscription) (*api.Nodes, error){
 	node_links, err := links.FetchVLESSLinks(sub.URL)
 	if err != nil {
 		return nil, errors.New("error getting nodes")
