@@ -12,6 +12,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.treeWidget.setColumnWidth(0, 200)
         self.typeCBox.installEventFilter(self)
+        self.typeCBox.currentTextChanged.connect(self.filter_tree)
 
         self.add_handler = AddHandler(self)
         self.get_state_handler = GetFullStateHandler(self)
@@ -65,6 +66,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         node.setData(0, Qt.UserRole, item.id)
         node.setData(0, Qt.UserRole + 1, item_type)
         return node
+    
+    def filter_tree(self):
+        filter_value = self.typeCBox.currentText().lower()
+    
+        for i in range(self.treeWidget.topLevelItemCount()):
+            item = self.treeWidget.topLevelItem(i)
+            item_type = item.data(0, Qt.UserRole + 1)
+        
+            if filter_value == "all":
+                item.setHidden(False)
+            elif filter_value == "subscriptions":
+                item.setHidden(item_type != "sub")
+            elif filter_value == "manual":
+                item.setHidden(item_type != "node")
 
     def add_node(self, item):
         node = self.create_node_item(item, "node")
