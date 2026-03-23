@@ -28,6 +28,25 @@ func NewProxyService(manager *manager.Manager) *ProxyService {
 	}
 }
 
+func (p *ProxyService) updateStatus(state api.ProxyState, msg string) {
+    activeID := p.mg.GetActiveNodeID()
+
+    if state == api.ProxyState_DISCONNECTED || state == api.ProxyState_ERROR {
+        activeID = ""
+    }
+
+    status := &api.ProxyStatus{
+        State:        state,
+        Message:      msg,
+        ActiveNodeId: activeID,
+    }
+
+    select {
+    case p.status_chan <- status:
+    default:
+    }
+}
+
 func (p *ProxyService) setCurrentCmd(cmd *exec.Cmd) {
     p.mu.Lock()
     defer p.mu.Unlock()
@@ -60,36 +79,16 @@ func (p *ProxyService) monitorXrayLogs(reader io.ReadCloser) {
         line := scanner.Text()
         fmt.Printf("[XRAY LOG]: %s\n", line)
 
-        var new_state *api.ProxyStatus
-
         switch {
         case strings.Contains(line, "started"):
-            new_state = &api.ProxyStatus{State: api.ProxyState_CONNECTED}
-
+            p.updateStatus(api.ProxyState_CONNECTED, "")
         case strings.Contains(line, "address already in use"):
-            new_state = &api.ProxyStatus{
-                State:   api.ProxyState_ERROR,
-                Message: "port is already in use",
-            }
-
+            p.updateStatus(api.ProxyState_ERROR, "port is already in use")
         case strings.Contains(line, "failed to handler mux client") && strings.Contains(line, "io: read/write on closed pipe"):
-            new_state = &api.ProxyStatus{
-                State:   api.ProxyState_ERROR,
-                Message: "protocol Error: check key settings",
-            }
-        }
-
-        if new_state != nil {
-            p.updateStatus(new_state)
+            p.updateStatus(api.ProxyState_ERROR, "protocol error, check key settings")
         }
     }
 
-    p.updateStatus(&api.ProxyStatus{State: api.ProxyState_DISCONNECTED})
-}
-
-func (p *ProxyService) updateStatus(status *api.ProxyStatus) {
-    select {
-    case p.status_chan <- status:
-    default:
-    }
+    p.mg.ClearActiveNode()
+    p.updateStatus(api.ProxyState_DISCONNECTED, "")
 }

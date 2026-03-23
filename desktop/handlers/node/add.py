@@ -1,5 +1,5 @@
 from handlers.grpc import GrpcHandler
-from model.worker import GrpcWorker, stub
+from model.worker import GrpcWorker, node_stub
 from model.generated import proxy_pb2
 import grpc
 
@@ -24,9 +24,9 @@ class AddHandler(GrpcHandler):
         self.dialog.labelError.setText("adding...")
 
         if url.startswith(("http", "https")):
-            self.worker = GrpcWorker(stub.AddSubscription, proxy_pb2.Url(url=url))
+            self.worker = GrpcWorker(node_stub.AddSubscription, proxy_pb2.Url(url=url))
         else:
-            self.worker = GrpcWorker(stub.AddNode, proxy_pb2.Url(url=url))
+            self.worker = GrpcWorker(node_stub.AddNode, proxy_pb2.Url(url=url))
 
         self.dialog.setEnabled(False)
         self.worker.success.connect(self.add_success) 

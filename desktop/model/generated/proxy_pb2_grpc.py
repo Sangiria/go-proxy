@@ -482,3 +482,161 @@ class NodeService(object):
             timeout,
             metadata,
             _registered_method=True)
+
+
+class ProxyServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.SubscribeStatus = channel.unary_stream(
+                '/goproxy.ProxyService/SubscribeStatus',
+                request_serializer=proxy__pb2.Null.SerializeToString,
+                response_deserializer=proxy__pb2.ProxyStatus.FromString,
+                _registered_method=True)
+        self.StartProxy = channel.unary_unary(
+                '/goproxy.ProxyService/StartProxy',
+                request_serializer=proxy__pb2.Id.SerializeToString,
+                response_deserializer=proxy__pb2.Null.FromString,
+                _registered_method=True)
+        self.StopProxy = channel.unary_unary(
+                '/goproxy.ProxyService/StopProxy',
+                request_serializer=proxy__pb2.Null.SerializeToString,
+                response_deserializer=proxy__pb2.Null.FromString,
+                _registered_method=True)
+
+
+class ProxyServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def SubscribeStatus(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StartProxy(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StopProxy(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_ProxyServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'SubscribeStatus': grpc.unary_stream_rpc_method_handler(
+                    servicer.SubscribeStatus,
+                    request_deserializer=proxy__pb2.Null.FromString,
+                    response_serializer=proxy__pb2.ProxyStatus.SerializeToString,
+            ),
+            'StartProxy': grpc.unary_unary_rpc_method_handler(
+                    servicer.StartProxy,
+                    request_deserializer=proxy__pb2.Id.FromString,
+                    response_serializer=proxy__pb2.Null.SerializeToString,
+            ),
+            'StopProxy': grpc.unary_unary_rpc_method_handler(
+                    servicer.StopProxy,
+                    request_deserializer=proxy__pb2.Null.FromString,
+                    response_serializer=proxy__pb2.Null.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'goproxy.ProxyService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('goproxy.ProxyService', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class ProxyService(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def SubscribeStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/goproxy.ProxyService/SubscribeStatus',
+            proxy__pb2.Null.SerializeToString,
+            proxy__pb2.ProxyStatus.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StartProxy(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/goproxy.ProxyService/StartProxy',
+            proxy__pb2.Id.SerializeToString,
+            proxy__pb2.Null.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StopProxy(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/goproxy.ProxyService/StopProxy',
+            proxy__pb2.Null.SerializeToString,
+            proxy__pb2.Null.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)

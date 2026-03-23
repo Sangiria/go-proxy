@@ -1,10 +1,22 @@
 from google.protobuf.internal import containers as _containers
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from collections.abc import Iterable as _Iterable, Mapping as _Mapping
 from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
+
+class ProxyState(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    DISCONNECTED: _ClassVar[ProxyState]
+    CONNECTING: _ClassVar[ProxyState]
+    CONNECTED: _ClassVar[ProxyState]
+    ERROR: _ClassVar[ProxyState]
+DISCONNECTED: ProxyState
+CONNECTING: ProxyState
+CONNECTED: ProxyState
+ERROR: ProxyState
 
 class State(_message.Message):
     __slots__ = ("manual", "subscription", "order")
@@ -109,3 +121,19 @@ class Nodes(_message.Message):
 class Null(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...
+
+class ProxyStatus(_message.Message):
+    __slots__ = ("state", "message", "active_node_id")
+    STATE_FIELD_NUMBER: _ClassVar[int]
+    MESSAGE_FIELD_NUMBER: _ClassVar[int]
+    ACTIVE_NODE_ID_FIELD_NUMBER: _ClassVar[int]
+    state: ProxyState
+    message: str
+    active_node_id: str
+    def __init__(self, state: _Optional[_Union[ProxyState, str]] = ..., message: _Optional[str] = ..., active_node_id: _Optional[str] = ...) -> None: ...
+
+class Switch(_message.Message):
+    __slots__ = ("switch",)
+    SWITCH_FIELD_NUMBER: _ClassVar[int]
+    switch: bool
+    def __init__(self, switch: bool = ...) -> None: ...

@@ -85,6 +85,7 @@ enum ProxyState {
 message ProxyStatus {
   ProxyState state = 1;
   string message = 2;
+  string active_node_id = 3;
 }
 
 message Switch {
