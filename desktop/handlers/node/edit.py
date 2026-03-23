@@ -1,6 +1,6 @@
 from PySide6.QtCore import QTimer
 from handlers.grpc import GrpcHandler
-from model.worker import GrpcWorker, stub
+from model.worker import GrpcWorker, node_stub
 import grpc
 
 class EditHandler(GrpcHandler):
@@ -21,7 +21,7 @@ class EditHandler(GrpcHandler):
         delta = getattr(self.dialog, 'delta', None)
         if delta:
             self.dialog.setEnabled(False)
-            method = stub.EditNode if role == "node" else stub.EditSubscription
+            method = node_stub.EditNode if role == "node" else node_stub.EditSubscription
             self.handle_edit(method, delta)
     def handle_edit(self, method, delta):
         self.worker = GrpcWorker(method, delta)

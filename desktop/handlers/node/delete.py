@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 from handlers.grpc import GrpcHandler
-from model.worker import GrpcWorker, stub
+from model.worker import GrpcWorker, node_stub
 from model.generated import proxy_pb2
 
 class DeleteHandler(GrpcHandler):
@@ -20,9 +20,9 @@ class DeleteHandler(GrpcHandler):
                 id_args["source_id"] = str(source_id)
 
         if item_role == "node":
-            self.worker = GrpcWorker(stub.DeleteNode, proxy_pb2.Id(**id_args))
+            self.worker = GrpcWorker(node_stub.DeleteNode, proxy_pb2.Id(**id_args))
         else:
-            self.worker = GrpcWorker(stub.DeleteSubscription, proxy_pb2.Id(id=str(item_id)))
+            self.worker = GrpcWorker(node_stub.DeleteSubscription, proxy_pb2.Id(id=str(item_id)))
         
         self.worker.success.connect(lambda: self.delete_success(item))
         self.worker.start()

@@ -1,5 +1,6 @@
+from PySide6.QtCore import QTimer
 from handlers.grpc import GrpcHandler
-from model.worker import GrpcWorker, stub
+from model.worker import GrpcWorker, node_stub
 from model.generated import proxy_pb2
 
 class GetFullStateHandler(GrpcHandler):
@@ -8,7 +9,7 @@ class GetFullStateHandler(GrpcHandler):
     def handle_get_state(self):
         if self.worker and self.worker.isRunning():
             return
-        self.worker = GrpcWorker(stub.GetFullState, proxy_pb2.Null())
+        self.worker = GrpcWorker(node_stub.GetFullState, proxy_pb2.Null())
         self.worker.success.connect(self.get_state_success) 
         self.worker.finished.connect(self.worker.deleteLater)
         self.worker.start()
@@ -23,3 +24,6 @@ class GetFullStateHandler(GrpcHandler):
                 self.view.add_node(manual_map[item_id])
             elif item_id in sub_map:
                 self.view.add_sub(sub_map[item_id])
+
+        if self.view.active_node_id:
+            self.view.highlight_node(self.view.active_node_id)

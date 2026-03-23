@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QProgressDialog
 from PySide6.QtCore import Qt
 from handlers.grpc import GrpcHandler
-from model.worker import GrpcWorker, stub
+from model.worker import GrpcWorker, node_stub
 from model.generated import proxy_pb2
 import grpc
 
@@ -28,7 +28,7 @@ class UpdateHandler(GrpcHandler):
 
         self.show_progress()
 
-        self.worker = GrpcWorker(stub.UpdateSubscription, proxy_pb2.Id(id=str(item_id)))
+        self.worker = GrpcWorker(node_stub.UpdateSubscription, proxy_pb2.Id(id=str(item_id)))
         self.worker.success.connect(self.update_success)
         self.worker.error.connect(self.update_error)
         self.worker.finished.connect(self.cleanup)

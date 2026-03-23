@@ -27,6 +27,12 @@ type Manager struct {
 func NewManager(s *file.State) *Manager {
 	return &Manager{State: s}
 }
+func (m *Manager) GetActiveNodeID() string {
+	m.Mu.RLock()
+    defer m.Mu.RUnlock()
+
+	return m.State.ActiveNodeId
+}
 
 func (m *Manager) SetActiveNode(id string) {
 	m.Mu.RLock()

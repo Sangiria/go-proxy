@@ -6,6 +6,9 @@ import (
 )
 
 func (n *NodeService) GetFullState(ctx context.Context, message *api.Null) (*api.State, error) {
+	n.mg.Mu.Lock()
+    defer n.mg.Mu.Unlock()
+
 	if n.mg.State.Manual == nil && n.mg.State.Subscriptions == nil {
 		return &api.State{}, nil
 	}

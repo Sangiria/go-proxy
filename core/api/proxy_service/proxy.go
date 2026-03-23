@@ -41,6 +41,7 @@ func (p *ProxyService) StartProxy(ctx context.Context, message *api.Id) (*api.Nu
     }
 
     p.mg.SetActiveNode(message.Id)
+    p.updateStatus(api.ProxyState_CONNECTING, "")
 
     go func() {
         defer stdin.Close()
@@ -71,8 +72,8 @@ func (p *ProxyService) StopProxy(ctx context.Context, req *api.Null) (*api.Null,
     p.current_cmd.Wait()
     p.current_cmd = nil
 
-    p.updateStatus(&api.ProxyStatus{State: api.ProxyState_DISCONNECTED})
     p.mg.ClearActiveNode()
+    p.updateStatus(api.ProxyState_DISCONNECTED, "")
 
     fmt.Println("Proxy stopped and system settings cleared")
     return &api.Null{}, nil
@@ -80,11 +81,21 @@ func (p *ProxyService) StopProxy(ctx context.Context, req *api.Null) (*api.Null,
 
 func (p *ProxyService) SubscribeStatus(req *api.Null, stream api.ProxyService_SubscribeStatusServer) error {
     state := api.ProxyState_DISCONNECTED
+    activeID := ""
+
     if p.current_cmd != nil {
         state = api.ProxyState_CONNECTED
+        activeID = p.mg.GetActiveNodeID()
     }
-    
-    stream.Send(&api.ProxyStatus{State: state})
+
+    initialStatus := &api.ProxyStatus{
+        State:        state,
+        ActiveNodeId: activeID,
+    }
+
+    if err := stream.Send(initialStatus); err != nil {
+        return err
+    }
 
     for {
         select {

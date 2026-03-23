@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 from handlers.grpc import GrpcHandler
-from model.worker import GrpcWorker, stub
+from model.worker import GrpcWorker, node_stub
 from model.generated import proxy_pb2
 from handlers.node.edit import EditHandler
 
@@ -32,9 +32,9 @@ class GetHandler(GrpcHandler):
             self.edit_handler.show_edit_dialog(response, item_role)
 
         if item_role == "node":
-            self.worker = GrpcWorker(stub.GetNode, proxy_pb2.Id(**id_args))
+            self.worker = GrpcWorker(node_stub.GetNode, proxy_pb2.Id(**id_args))
         else:
-            self.worker = GrpcWorker(stub.GetSubscription, proxy_pb2.Id(id=str(item_id)))
+            self.worker = GrpcWorker(node_stub.GetSubscription, proxy_pb2.Id(id=str(item_id)))
         
         self.worker.success.connect(on_success)
         self.worker.start()
