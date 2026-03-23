@@ -28,6 +28,22 @@ func NewManager(s *file.State) *Manager {
 	return &Manager{State: s}
 }
 
+func (m *Manager) SetActiveNode(id string) {
+	m.Mu.RLock()
+    defer m.Mu.RUnlock()
+	m.State.ActiveNodeId = id
+
+	_ = file.SaveState(m.State)
+}
+
+func (m *Manager) ClearActiveNode() {
+	m.Mu.RLock()
+    defer m.Mu.RUnlock()
+	m.State.ActiveNodeId = ""
+
+	_ = file.SaveState(m.State)
+}
+
 func (m *Manager) FindNode(message *api.Id) *models.Node {
 	m.Mu.RLock()
     defer m.Mu.RUnlock()

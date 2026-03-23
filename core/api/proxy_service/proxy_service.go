@@ -18,13 +18,13 @@ type ProxyService struct {
 	mg 				*manager.Manager
 	current_cmd 	*exec.Cmd
     mu      		sync.Mutex
-	status_chan 	chan api.ProxyState
+	status_chan     chan *api.ProxyStatus
 }
 
 func NewProxyService(manager *manager.Manager) *ProxyService {
 	return &ProxyService{
 		mg: manager,
-		status_chan: make(chan api.ProxyState, 10),
+		status_chan: make(chan *api.ProxyStatus, 10),
 	}
 }
 
@@ -54,20 +54,42 @@ func (p *ProxyService) setCurrentCmd(cmd *exec.Cmd) {
 
 func (p *ProxyService) monitorXrayLogs(reader io.ReadCloser) {
     defer reader.Close()
-	
     scanner := bufio.NewScanner(reader)
+
     for scanner.Scan() {
         line := scanner.Text()
-        
         fmt.Printf("[XRAY LOG]: %s\n", line)
 
-        if strings.Contains(line, "initial connection") {
-            p.status_chan <- api.ProxyState_CONNECTED
-        } else if strings.Contains(line, "address already in use") {
-            p.status_chan <- api.ProxyState_ERROR
-            fmt.Println("!!! PORT ALREADY IN USE !!!")
+        var new_state *api.ProxyStatus
+
+        switch {
+        case strings.Contains(line, "started"):
+            new_state = &api.ProxyStatus{State: api.ProxyState_CONNECTED}
+
+        case strings.Contains(line, "address already in use"):
+            new_state = &api.ProxyStatus{
+                State:   api.ProxyState_ERROR,
+                Message: "port is already in use",
+            }
+
+        case strings.Contains(line, "failed to handler mux client") && strings.Contains(line, "io: read/write on closed pipe"):
+            new_state = &api.ProxyStatus{
+                State:   api.ProxyState_ERROR,
+                Message: "protocol Error: check key settings",
+            }
+        }
+
+        if new_state != nil {
+            p.updateStatus(new_state)
         }
     }
 
-	// p.status_chan <- api.ProxyState_DISCONNECTED
+    p.updateStatus(&api.ProxyStatus{State: api.ProxyState_DISCONNECTED})
+}
+
+func (p *ProxyService) updateStatus(status *api.ProxyStatus) {
+    select {
+    case p.status_chan <- status:
+    default:
+    }
 }

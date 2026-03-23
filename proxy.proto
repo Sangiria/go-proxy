@@ -85,8 +85,6 @@ enum ProxyState {
 message ProxyStatus {
   ProxyState state = 1;
   string message = 2;
-  double upload_speed = 3;
-  double download_speed = 4;
 }
 
 message Switch {
@@ -95,8 +93,6 @@ message Switch {
 
 service ProxyService {
   rpc SubscribeStatus (Null) returns (stream ProxyStatus);
-  rpc StartProxy (Id) returns (Null); 
+  rpc StartProxy (Id) returns (Null);
   rpc StopProxy (Null) returns (Null);
-  rpc SwitchNode (Id) returns (Null);
-  rpc ToggleTun (Switch) returns (Null);
 }
