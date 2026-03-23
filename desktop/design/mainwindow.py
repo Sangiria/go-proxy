@@ -16,9 +16,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QHeaderView,
-    QMainWindow, QPushButton, QRadioButton, QSizePolicy,
-    QSpacerItem, QStatusBar, QToolButton, QTreeWidget,
-    QTreeWidgetItem, QVBoxLayout, QWidget)
+    QMainWindow, QPushButton, QSizePolicy, QSpacerItem,
+    QStatusBar, QToolButton, QTreeWidget, QTreeWidgetItem,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -36,6 +36,12 @@ class Ui_MainWindow(object):
         self.widget.setStyleSheet(u"")
         self.horizontalLayout = QHBoxLayout(self.widget)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.btnAdd = QPushButton(self.widget)
+        self.btnAdd.setObjectName(u"btnAdd")
+        self.btnAdd.setStyleSheet(u"")
+
+        self.horizontalLayout.addWidget(self.btnAdd)
+
         self.typeCBox = QComboBox(self.widget)
         self.typeCBox.addItem("")
         self.typeCBox.addItem("")
@@ -66,27 +72,9 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2.addWidget(self.btnStart)
 
-        self.rdbtnTun = QRadioButton(self.widget_2)
-        self.rdbtnTun.setObjectName(u"rdbtnTun")
-        self.rdbtnTun.setAutoExclusive(False)
-
-        self.horizontalLayout_2.addWidget(self.rdbtnTun)
-
-        self.rdbtnSysProxy = QRadioButton(self.widget_2)
-        self.rdbtnSysProxy.setObjectName(u"rdbtnSysProxy")
-        self.rdbtnSysProxy.setAutoExclusive(False)
-
-        self.horizontalLayout_2.addWidget(self.rdbtnSysProxy)
-
         self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_2.addItem(self.horizontalSpacer_2)
-
-        self.btnAdd = QPushButton(self.widget_2)
-        self.btnAdd.setObjectName(u"btnAdd")
-        self.btnAdd.setStyleSheet(u"")
-
-        self.horizontalLayout_2.addWidget(self.btnAdd)
 
 
         self.verticalLayout.addWidget(self.widget_2)
@@ -103,6 +91,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Go-proxy", None))
+        self.btnAdd.setText(QCoreApplication.translate("MainWindow", u"Add", None))
         self.typeCBox.setItemText(0, QCoreApplication.translate("MainWindow", u"All", None))
         self.typeCBox.setItemText(1, QCoreApplication.translate("MainWindow", u"Manual", None))
         self.typeCBox.setItemText(2, QCoreApplication.translate("MainWindow", u"Subscriptions", None))
@@ -115,8 +104,5 @@ class Ui_MainWindow(object):
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("MainWindow", u"Type", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("MainWindow", u"Name", None));
         self.btnStart.setText(QCoreApplication.translate("MainWindow", u"\u25b7", None))
-        self.rdbtnTun.setText(QCoreApplication.translate("MainWindow", u"TUN", None))
-        self.rdbtnSysProxy.setText(QCoreApplication.translate("MainWindow", u"System Proxy", None))
-        self.btnAdd.setText(QCoreApplication.translate("MainWindow", u"Add", None))
     # retranslateUi
 

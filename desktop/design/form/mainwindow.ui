@@ -34,6 +34,16 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
+        <widget class="QPushButton" name="btnAdd">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>Add</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QComboBox" name="typeCBox">
          <item>
           <property name="text">
@@ -116,26 +126,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="rdbtnTun">
-         <property name="text">
-          <string>TUN</string>
-         </property>
-         <property name="autoExclusive">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="rdbtnSysProxy">
-         <property name="text">
-          <string>System Proxy</string>
-         </property>
-         <property name="autoExclusive">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
         <spacer name="horizontalSpacer_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -147,16 +137,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnAdd">
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="text">
-          <string>Add</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>
