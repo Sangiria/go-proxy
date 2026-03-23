@@ -77,6 +77,28 @@ type Config struct {
 }
 
 func NewConfig(n *Parsed) *Config {
+	stream := StreamSettings{
+        Network:  n.Transport,
+        Security: n.Security,
+    }
+
+    if n.Security == "reality" {
+        stream.RealitySettings = &RealitySettings{
+            ServerName:  n.Sni,
+            Fingerprint: n.Fp,
+            PublicKey:   n.Pbk,
+            ShortID:     n.Sid,
+        }
+    }
+
+    if n.Transport == "xhttp" {
+        stream.XttpSettings = &XttpSettings{
+            Host: n.Host,
+            Path: n.Path,
+            Mode: n.XHTTPMode,
+        }
+    }
+	
 	return &Config{
 		LogLevel: LogLevel{
 			LogLevel: "info",
@@ -85,7 +107,7 @@ func NewConfig(n *Parsed) *Config {
 			{
         		Tag: "socks",
         		Listen: "127.0.0.1",
-        		Port: 10808,
+        		Port: 20808,
 				Protocol: "socks",
         		InboundSettings: InboundSettings{
           			Auth: "noauth",
@@ -116,22 +138,7 @@ func NewConfig(n *Parsed) *Config {
             			},
           			},
         		},
-        		StreamSettings: StreamSettings{
-          			Network: n.Transport,
-          			Security: n.Security,
-          			RealitySettings: &RealitySettings{
-            			ServerName: n.Sni,
-            			Fingerprint: n.Fp,
-            			PublicKey: n.Pbk,
-            			ShortID: n.Sid,
-          			},
-					XttpSettings: &XttpSettings{
-						Host: n.Host,
-						Path: n.Path,
-						Mode: n.XHTTPMode,
-						XttpExtra: n.XHTTPExtra,
-					},
-        		},
+        		StreamSettings: stream,
       		},
     	},
   	}
