@@ -10,9 +10,15 @@ from handlers.node.delete import DeleteHandler
 from handlers.node.update import UpdateHandler
 from handlers.proxy import ProxyControlHandler, StatusHandler
 from pathlib import Path
+import sys
+from pathlib import Path
 
-current_dir = Path(__file__).resolve().parent
-icon_path = current_dir.parent / "design" / "form" / "icon.png"
+def get_resource_path():
+    if hasattr(sys, '_MEIPASS'):
+        return Path(sys._MEIPASS)
+    return Path(__file__).resolve().parent.parent
+
+ICON_PATH = get_resource_path() / "design" / "form" / "icon.png"
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -59,7 +65,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.active_node_id = str(node_id)
         
         self.reset_tree_styles()
-        active_icon = QIcon(str(icon_path))
+        active_icon = QIcon(str(ICON_PATH))
 
         it = QTreeWidgetItemIterator(self.treeWidget)
         while it.value():

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -25,7 +26,17 @@ func (p *ProxyService) StartProxy(ctx context.Context, message *api.Id) (*api.Nu
         return nil, status.Errorf(codes.Internal, "failed to marshal config: %v", err)
     }
 
-    executablePath := "../bin/xray" 
+    exePath, err := os.Executable()
+    if err != nil {
+        return nil, status.Errorf(codes.Internal, "failed to get self executable path: %v", err)
+    }
+    appRoot := filepath.Dir(exePath)
+    executablePath := filepath.Join(appRoot, "bin", "xray")
+
+    if _, err := os.Stat(executablePath); os.IsNotExist(err) {
+        return nil, status.Errorf(codes.Internal, "xray binary not found at: %s", executablePath)
+    }
+
     cmd := exec.Command(executablePath, "run", "-config", "stdin:")
     
     stdin, err := cmd.StdinPipe()
