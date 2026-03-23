@@ -40,6 +40,8 @@ func (p *ProxyService) StartProxy(ctx context.Context, message *api.Id) (*api.Nu
         return nil, status.Errorf(codes.Internal, "failed to start xray: %v", err)
     }
 
+    p.mg.SetActiveNode(message.Id)
+
     go func() {
         defer stdin.Close()
         _, err := stdin.Write(configJson)
@@ -48,7 +50,7 @@ func (p *ProxyService) StartProxy(ctx context.Context, message *api.Id) (*api.Nu
         }
     }()
 
-    p.setCurrentCmd(cmd) 
+    p.setCurrentCmd(cmd)
     go p.monitorXrayLogs(stderr)
     
     return &api.Null{}, nil
@@ -69,8 +71,34 @@ func (p *ProxyService) StopProxy(ctx context.Context, req *api.Null) (*api.Null,
     p.current_cmd.Wait()
     p.current_cmd = nil
 
-    // p.status_chan <- api.ProxyState_DISCONNECTED
+    p.updateStatus(&api.ProxyStatus{State: api.ProxyState_DISCONNECTED})
+    p.mg.ClearActiveNode()
 
     fmt.Println("Proxy stopped and system settings cleared")
     return &api.Null{}, nil
+}
+
+func (p *ProxyService) SubscribeStatus(req *api.Null, stream api.ProxyService_SubscribeStatusServer) error {
+    state := api.ProxyState_DISCONNECTED
+    if p.current_cmd != nil {
+        state = api.ProxyState_CONNECTED
+    }
+    
+    stream.Send(&api.ProxyStatus{State: state})
+
+    for {
+        select {
+        case <-stream.Context().Done():
+            return stream.Context().Err()
+
+        case status, ok := <-p.status_chan:
+            if !ok {
+                return nil
+            }
+
+            if err := stream.Send(status); err != nil {
+                return err
+            }
+        }
+    }
 }
