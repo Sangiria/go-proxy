@@ -450,3 +450,274 @@ var NodeService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "proxy.proto",
 }
+
+const (
+	ProxyService_SubscribeStatus_FullMethodName = "/goproxy.ProxyService/SubscribeStatus"
+	ProxyService_StartProxy_FullMethodName      = "/goproxy.ProxyService/StartProxy"
+	ProxyService_StopProxy_FullMethodName       = "/goproxy.ProxyService/StopProxy"
+	ProxyService_SwitchNode_FullMethodName      = "/goproxy.ProxyService/SwitchNode"
+	ProxyService_ToggleTun_FullMethodName       = "/goproxy.ProxyService/ToggleTun"
+)
+
+// ProxyServiceClient is the client API for ProxyService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type ProxyServiceClient interface {
+	SubscribeStatus(ctx context.Context, in *Null, opts ...grpc.CallOption) (ProxyService_SubscribeStatusClient, error)
+	StartProxy(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Null, error)
+	StopProxy(ctx context.Context, in *Null, opts ...grpc.CallOption) (*Null, error)
+	SwitchNode(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Null, error)
+	ToggleTun(ctx context.Context, in *Switch, opts ...grpc.CallOption) (*Null, error)
+}
+
+type proxyServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewProxyServiceClient(cc grpc.ClientConnInterface) ProxyServiceClient {
+	return &proxyServiceClient{cc}
+}
+
+func (c *proxyServiceClient) SubscribeStatus(ctx context.Context, in *Null, opts ...grpc.CallOption) (ProxyService_SubscribeStatusClient, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ProxyService_ServiceDesc.Streams[0], ProxyService_SubscribeStatus_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &proxyServiceSubscribeStatusClient{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ProxyService_SubscribeStatusClient interface {
+	Recv() (*ProxyStatus, error)
+	grpc.ClientStream
+}
+
+type proxyServiceSubscribeStatusClient struct {
+	grpc.ClientStream
+}
+
+func (x *proxyServiceSubscribeStatusClient) Recv() (*ProxyStatus, error) {
+	m := new(ProxyStatus)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *proxyServiceClient) StartProxy(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Null, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Null)
+	err := c.cc.Invoke(ctx, ProxyService_StartProxy_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *proxyServiceClient) StopProxy(ctx context.Context, in *Null, opts ...grpc.CallOption) (*Null, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Null)
+	err := c.cc.Invoke(ctx, ProxyService_StopProxy_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *proxyServiceClient) SwitchNode(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Null, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Null)
+	err := c.cc.Invoke(ctx, ProxyService_SwitchNode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *proxyServiceClient) ToggleTun(ctx context.Context, in *Switch, opts ...grpc.CallOption) (*Null, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Null)
+	err := c.cc.Invoke(ctx, ProxyService_ToggleTun_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ProxyServiceServer is the server API for ProxyService service.
+// All implementations must embed UnimplementedProxyServiceServer
+// for forward compatibility
+type ProxyServiceServer interface {
+	SubscribeStatus(*Null, ProxyService_SubscribeStatusServer) error
+	StartProxy(context.Context, *Id) (*Null, error)
+	StopProxy(context.Context, *Null) (*Null, error)
+	SwitchNode(context.Context, *Id) (*Null, error)
+	ToggleTun(context.Context, *Switch) (*Null, error)
+	mustEmbedUnimplementedProxyServiceServer()
+}
+
+// UnimplementedProxyServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedProxyServiceServer struct {
+}
+
+func (UnimplementedProxyServiceServer) SubscribeStatus(*Null, ProxyService_SubscribeStatusServer) error {
+	return status.Errorf(codes.Unimplemented, "method SubscribeStatus not implemented")
+}
+func (UnimplementedProxyServiceServer) StartProxy(context.Context, *Id) (*Null, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StartProxy not implemented")
+}
+func (UnimplementedProxyServiceServer) StopProxy(context.Context, *Null) (*Null, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StopProxy not implemented")
+}
+func (UnimplementedProxyServiceServer) SwitchNode(context.Context, *Id) (*Null, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SwitchNode not implemented")
+}
+func (UnimplementedProxyServiceServer) ToggleTun(context.Context, *Switch) (*Null, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ToggleTun not implemented")
+}
+func (UnimplementedProxyServiceServer) mustEmbedUnimplementedProxyServiceServer() {}
+
+// UnsafeProxyServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ProxyServiceServer will
+// result in compilation errors.
+type UnsafeProxyServiceServer interface {
+	mustEmbedUnimplementedProxyServiceServer()
+}
+
+func RegisterProxyServiceServer(s grpc.ServiceRegistrar, srv ProxyServiceServer) {
+	s.RegisterService(&ProxyService_ServiceDesc, srv)
+}
+
+func _ProxyService_SubscribeStatus_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Null)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ProxyServiceServer).SubscribeStatus(m, &proxyServiceSubscribeStatusServer{ServerStream: stream})
+}
+
+type ProxyService_SubscribeStatusServer interface {
+	Send(*ProxyStatus) error
+	grpc.ServerStream
+}
+
+type proxyServiceSubscribeStatusServer struct {
+	grpc.ServerStream
+}
+
+func (x *proxyServiceSubscribeStatusServer) Send(m *ProxyStatus) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _ProxyService_StartProxy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Id)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyServiceServer).StartProxy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProxyService_StartProxy_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyServiceServer).StartProxy(ctx, req.(*Id))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProxyService_StopProxy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Null)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyServiceServer).StopProxy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProxyService_StopProxy_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyServiceServer).StopProxy(ctx, req.(*Null))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProxyService_SwitchNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Id)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyServiceServer).SwitchNode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProxyService_SwitchNode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyServiceServer).SwitchNode(ctx, req.(*Id))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProxyService_ToggleTun_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Switch)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyServiceServer).ToggleTun(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProxyService_ToggleTun_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyServiceServer).ToggleTun(ctx, req.(*Switch))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// ProxyService_ServiceDesc is the grpc.ServiceDesc for ProxyService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ProxyService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "goproxy.ProxyService",
+	HandlerType: (*ProxyServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "StartProxy",
+			Handler:    _ProxyService_StartProxy_Handler,
+		},
+		{
+			MethodName: "StopProxy",
+			Handler:    _ProxyService_StopProxy_Handler,
+		},
+		{
+			MethodName: "SwitchNode",
+			Handler:    _ProxyService_SwitchNode_Handler,
+		},
+		{
+			MethodName: "ToggleTun",
+			Handler:    _ProxyService_ToggleTun_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SubscribeStatus",
+			Handler:       _ProxyService_SubscribeStatus_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "proxy.proto",
+}

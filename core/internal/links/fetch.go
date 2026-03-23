@@ -1,12 +1,51 @@
 package links
 
 import (
+	"core/api"
+	"core/internal/manager"
+	"core/models"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
 )
+
+type UpdateData struct {
+    Nodes     	map[string]*models.Node
+    Order     	[]string
+    Added  		[]*api.Node
+}
+
+func FetchSubscriptionNodes (url string) (*UpdateData, error){
+	node_links, err := FetchVLESSLinks(url)
+	if err != nil {
+		return nil, errors.New("error getting nodes")
+	}
+
+	data := &UpdateData{
+        Nodes:    	make(map[string]*models.Node),
+        Order:    	make([]string, len(node_links)),
+        Added: 		make([]*api.Node, len(node_links)),
+    }
+
+	for id, link := range node_links{
+		node_key := GenerateID(link)
+
+		node, err := ParseURLToNode(link)
+		if err != nil {
+			return nil, err
+		}
+
+		data.Nodes[node_key] = node
+		data.Order[id] = node_key
+		data.Added[id] = manager.MapToApiNode(node_key, node)
+	}
+
+	return data, nil
+}
+
 
 func FetchVLESSLinks(u string) ([]string, error){
 	response, err := http.Get(u)

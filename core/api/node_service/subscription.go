@@ -15,24 +15,33 @@ import (
 )
 
 func (n *NodeService) UpdateSubscription(ctx context.Context, message *api.Id) (*api.Nodes, error)  {
-	sub := n.findSubscription(message.Id)
-
-	nodes, err := n.updateSubscriptionNodes(sub)
+	sub := n.mg.FindSubscription(message.Id)
+	data, err := links.FetchSubscriptionNodes(sub.URL)
 	if err != nil {
 		return nil, status.Error(codes.Canceled, err.Error())
 	}
 
-	if err := file.SaveState(n.state); err != nil {
+	n.mg.Mu.Lock()
+    defer n.mg.Mu.Unlock()
+
+	sub.Nodes, sub.NodeOrder = data.Nodes, data.Order
+
+	if err := file.SaveState(n.mg.State); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return nodes, nil
+	return &api.Nodes{
+		Nodes: data.Added,
+	}, nil
 }
 
 func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*api.Subscription, error) {
+	n.mg.Mu.Lock()
+    defer n.mg.Mu.Unlock()
+
 	sub_key := links.GenerateID(message.Url)
 
-	_, found := n.state.Subscriptions[sub_key]
+	_, found := n.mg.State.Subscriptions[sub_key]
 	if found {
 		return nil, status.Errorf(codes.AlreadyExists, "subscription already exists")
 	}
@@ -49,37 +58,43 @@ func (n *NodeService) AddSubscription(ctx context.Context, message *api.Url) (*a
 		NodeOrder: make([]string, 0),
 	}
 
-	nodes, err := n.updateSubscriptionNodes(sub)
+	data, err := links.FetchSubscriptionNodes(sub.URL)
 	if err != nil {
 		return nil, status.Error(codes.Canceled, err.Error())
 	}
+	sub.Nodes, sub.NodeOrder = data.Nodes, data.Order
 
-	n.state.Subscriptions[sub_key] = sub
-	n.state.ItemsOrder = append(n.state.ItemsOrder, sub_key)
+	n.mg.State.Subscriptions[sub_key] = sub
+	n.mg.State.ItemsOrder = append(n.mg.State.ItemsOrder, sub_key)
 
-	if err := file.SaveState(n.state); err != nil {
+	if err := file.SaveState(n.mg.State); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &api.Subscription{
 		Id: sub_key,
 		Name: name.Host,
-		Nodes: nodes,
+		Nodes: &api.Nodes{
+			Nodes: data.Added,
+		},
 	}, nil
 }
 
 func (n *NodeService) EditSubscription(ctx context.Context, message *api.SubscriptionForm) (*api.Null, error) {
+	n.mg.Mu.Lock()
+    defer n.mg.Mu.Unlock()
+	
 	empty := &api.SubscriptionForm{Id: message.Id}
 
 	if proto.Equal(message, empty) {
 		return nil, status.Errorf(codes.InvalidArgument, "nothing to update")
 	}
 
-	if err := service.UpdateSubscriptionFromForm(n.state.Subscriptions[message.Id], message); err != nil {
+	if err := service.UpdateSubscriptionFromForm(n.mg.State.Subscriptions[message.Id], message); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "update failed: %v", err)
 	}
 
-	if err := file.SaveState(n.state); err != nil {
+	if err := file.SaveState(n.mg.State); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	
@@ -87,8 +102,7 @@ func (n *NodeService) EditSubscription(ctx context.Context, message *api.Subscri
 }
 
 func (n *NodeService) GetSubscription(ctx context.Context, message *api.Id) (*api.SubscriptionForm, error) {
-	sub := n.findSubscription(message.Id)
-
+	sub := n.mg.FindSubscription(message.Id)
 	return &api.SubscriptionForm{
 		Name: &sub.Name,
 		Url: &sub.URL,
@@ -96,19 +110,22 @@ func (n *NodeService) GetSubscription(ctx context.Context, message *api.Id) (*ap
 }
 
 func (n *NodeService) DeleteSubscription(ctx context.Context, message *api.Id) (*api.Null, error) {
-	_, ok := n.state.Subscriptions[message.Id].Nodes[n.state.ActiveNodeId]
+	n.mg.Mu.Lock()
+    defer n.mg.Mu.Unlock()
+
+	_, ok := n.mg.State.Subscriptions[message.Id].Nodes[n.mg.State.ActiveNodeId]
 	if ok {
 		return nil, status.Errorf(codes.PermissionDenied, "this subscription has active node")
 	}
 
-	for id, sub_key := range n.state.ItemsOrder {
+	for id, sub_key := range n.mg.State.ItemsOrder {
 		if sub_key == message.Id {
-			n.state.ItemsOrder = append(n.state.ItemsOrder[:id], n.state.ItemsOrder[id+1:]...)
-			delete(n.state.Subscriptions, sub_key)
+			n.mg.State.ItemsOrder = append(n.mg.State.ItemsOrder[:id], n.mg.State.ItemsOrder[id+1:]...)
+			delete(n.mg.State.Subscriptions, sub_key)
 		}
 	}
 
-	if err := file.SaveState(n.state); err != nil {
+	if err := file.SaveState(n.mg.State); err != nil {
         return nil, status.Errorf(codes.Internal, "save error: %v", err)
     }
 

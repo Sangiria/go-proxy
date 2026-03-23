@@ -28,7 +28,7 @@ func mapToApiNode(id string, node *models.Node) *api.Node {
 func mapToApiNodeForm(node *models.Node) *api.NodeForm {
 	port := int32(node.Parsed.Port)
 	extra := string(node.Parsed.XHTTPExtra)
-
+	
 	return &api.NodeForm{
 		Name: &node.Name,
 		Address: &node.Parsed.Address,
@@ -46,9 +46,11 @@ func mapToApiNodeForm(node *models.Node) *api.NodeForm {
 }
 
 func (n *NodeService) AddNode(ctx context.Context, message *api.Url) (*api.Node, error) {
-	node_key := links.GenerateID(message.Url)
+	n.mg.Mu.Lock()
+    defer n.mg.Mu.Unlock()
 
-	_, found := n.state.Manual[node_key]
+	node_key := links.GenerateID(message.Url)
+	_, found := n.mg.State.Manual[node_key]
 	if found {
 		return nil, status.Errorf(codes.AlreadyExists, "manual node already exists")
 	}
@@ -58,10 +60,10 @@ func (n *NodeService) AddNode(ctx context.Context, message *api.Url) (*api.Node,
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	n.state.Manual[node_key] = node
-	n.state.ItemsOrder = append(n.state.ItemsOrder, node_key)
+	n.mg.State.Manual[node_key] = node
+	n.mg.State.ItemsOrder = append(n.mg.State.ItemsOrder, node_key)
 
-	if err := file.SaveState(n.state); err != nil {
+	if err := file.SaveState(n.mg.State); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -74,13 +76,16 @@ func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api
         return nil, status.Errorf(codes.InvalidArgument, "nothing to update")
     }
 
-    node := n.findNode(&api.Id{Id: message.Id, SourceId: message.SourceId})
+    node := n.mg.FindNode(&api.Id{Id: message.Id, SourceId: message.SourceId})
+
+	n.mg.Mu.Lock()
+    defer n.mg.Mu.Unlock()
 
     if err := service.UpdateNodeFromForm(node, message); err != nil {
         return nil, status.Errorf(codes.InvalidArgument, "update failed: %v", err)
     }
 
-    if err := file.SaveState(n.state); err != nil {
+    if err := file.SaveState(n.mg.State); err != nil {
         return nil, status.Errorf(codes.Internal, "save error: %v", err)
     }
     
@@ -88,32 +93,35 @@ func (n *NodeService) EditNode(ctx context.Context, message *api.NodeForm) (*api
 }
 
 func (n *NodeService) GetNode(ctx context.Context, message *api.Id) (*api.NodeForm, error) {
-	return mapToApiNodeForm(n.findNode(message)), nil
+	return mapToApiNodeForm(n.mg.FindNode(message)), nil
 }
 
 func (n *NodeService) DeleteNode(ctx context.Context, message *api.Id) (*api.Null, error) {
-	if message.Id == n.state.ActiveNodeId {
+	n.mg.Mu.Lock()
+    defer n.mg.Mu.Unlock()
+	
+	if message.Id == n.mg.State.ActiveNodeId {
 		return nil, status.Errorf(codes.PermissionDenied, "this node is active")
 	}
 
 	if message.SourceId != nil {
-		order := n.state.Subscriptions[*message.SourceId].NodeOrder
+		order := n.mg.State.Subscriptions[*message.SourceId].NodeOrder
 		for id, node_key := range order {
 			if node_key == message.Id {
-				n.state.Subscriptions[*message.SourceId].NodeOrder = append(order[:id], order[id+1:]...)
-				delete(n.state.Subscriptions[*message.SourceId].Nodes, node_key)
+				n.mg.State.Subscriptions[*message.SourceId].NodeOrder = append(order[:id], order[id+1:]...)
+				delete(n.mg.State.Subscriptions[*message.SourceId].Nodes, node_key)
 			}
 		}
 	} else {
-		for id, node_key := range n.state.ItemsOrder {
+		for id, node_key := range n.mg.State.ItemsOrder {
 			if node_key == message.Id {
-				n.state.ItemsOrder = append(n.state.ItemsOrder[:id], n.state.ItemsOrder[id+1:]...)
-				delete(n.state.Manual, node_key)
+				n.mg.State.ItemsOrder = append(n.mg.State.ItemsOrder[:id], n.mg.State.ItemsOrder[id+1:]...)
+				delete(n.mg.State.Manual, node_key)
 			}
 		}
 	}
 
-	if err := file.SaveState(n.state); err != nil {
+	if err := file.SaveState(n.mg.State); err != nil {
         return nil, status.Errorf(codes.Internal, "save error: %v", err)
     }
 
